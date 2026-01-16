@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creatorflow - Tasks</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            // Modo escuro forçado
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        ugc: {
+                            bg: '#141414',       // Fundo principal
+                            sidebar: '#0F0F0F',  // Sidebar
+                            card: '#1E1E1E',     // Cards
+                            pink: '#E65696',     // Destaque
+                            purple: '#9D66E3',   // Secundária
+                            text: '#EAEAEA',     // Texto principal
+                            muted: '#A0A0A0',    // Texto secundário
+                            border: '#2A2A2A',   // Bordas
+                            hover: '#252525'     // Hover
+                        }
+                    },
+                    transitionProperty: {
+                        'width': 'width'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #141414; color: #EAEAEA; }
+        
+        /* Scrollbar Personalizada */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #141414; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(230, 86, 150, 0.15) 0%, rgba(157, 102, 227, 0.05) 100%);
+            border-left: 3px solid #E65696;
+            color: #E65696;
+        }
+
+        /* Animações */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        
+        /* Sidebar e Mobile */
+        .sidebar-mobile { transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+        .sidebar-mobile.open { transform: translateX(0); }
+
+        /* Kanban Styles - Simplificado sem Drag */
+        .kanban-col { min-width: 300px; max-width: 300px; }
+        /* No mobile, colunas ocupam largura total */
+        @media (max-width: 768px) {
+            .kanban-col { min-width: 100%; max-width: 100%; margin-bottom: 1.5rem; }
+            #kanban-board-container > div { flex-direction: column; }
+        }
+
+        .kanban-card { 
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; 
+            cursor: pointer;
+        }
+        .kanban-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.5); border-color: #E65696; }
+        
+        .kanban-drop-area { min-height: 100px; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-sm relative">
+
+    <!-- Overlay para Mobile -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden backdrop-blur-sm" onclick="toggleMobileMenu()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-ugc-sidebar border-r border-ugc-border flex flex-col sidebar-mobile md:translate-x-0 md:static transition-all duration-300 ease-in-out group/sidebar">
+        <!-- Logo Area -->
+        <div class="h-20 flex items-center justify-between px-6 border-b border-ugc-border/50 relative">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-ugc-pink to-ugc-purple flex items-center justify-center shrink-0 shadow-lg shadow-ugc-pink/20">
+                    <i data-lucide="sparkles" class="text-white w-4 h-4"></i>
+                </div>
+                <span class="font-display font-bold text-lg tracking-wide text-white">Creatorflow</span>
+            </div>
+            
+            <button onclick="toggleSidebarDesktop()" class="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-ugc-card border border-ugc-border rounded-full items-center justify-center text-ugc-muted hover:text-white hover:border-ugc-pink transition-colors z-50">
+                <i id="sidebar-toggle-icon" data-lucide="chevron-left" class="w-3 h-3 transition-transform duration-300"></i>
+            </button>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto overflow-x-hidden">
+            <p class="section-label px-3 text-[10px] font-bold text-ugc-muted uppercase tracking-wider mb-2 mt-2 truncate">Principal</p>
+            
+            <a href="creatorflow.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Dashboard</span>
+            </a>
+            
+            <a href="planner.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Planner">
+                <i data-lucide="calendar" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Planner</span>
+            </a>
+
+            <a href="tasks.html" class="nav-item active w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Tasks">
+                <i data-lucide="briefcase" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Tasks</span>
+            </a>
+
+            <p class="section-label px-3 text-[10px] font-bold text-ugc-muted uppercase tracking-wider mb-2 mt-6 truncate">Criação</p>
+
+            <a href="scripts.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Roteiros IA">
+                <i data-lucide="file-text" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Roteiros IA</span>
+                <span class="nav-badge ml-auto bg-ugc-pink/20 text-ugc-pink text-[10px] px-2 py-0.5 rounded-full font-bold sidebar-text">NOVO</span>
+            </a>
+
+            <p class="section-label px-3 text-[10px] font-bold text-ugc-muted uppercase tracking-wider mb-2 mt-6 truncate">Gestão</p>
+
+            <a href="contracts.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Contratos">
+                <i data-lucide="file-signature" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Contratos</span>
+            </a>
+            <a href="finance.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Financeiro">
+                <i data-lucide="dollar-sign" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Financeiro</span>
+            </a>
+            <a href="pricing_simulator.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Simulador de Preço">
+                <i data-lucide="calculator" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Simulador de Preço</span>
+            </a>
+        </nav>
+
+        <!-- Perfil Usuário -->
+        <div class="p-4 border-t border-ugc-border">
+            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-ugc-hover cursor-pointer transition-colors" title="Perfil">
+                <img id="profile-avatar" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Perfil" class="w-9 h-9 rounded-full border border-ugc-border shrink-0">
+                <div class="flex-1 min-w-0 user-info transition-opacity duration-300">
+                    <p id="profile-name" class="text-sm font-medium text-white truncate">Carregando...</p>
+                    <p id="profile-email" class="text-xs text-ugc-muted truncate">...</p>
+                </div>
+                <button onclick="logout()" title="Sair" class="ml-auto p-1.5 rounded hover:bg-ugc-hover text-ugc-muted hover:text-white transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 flex flex-col min-w-0 bg-ugc-bg overflow-hidden relative transition-all duration-300">
+        
+        <!-- Header -->
+        <header class="h-20 bg-ugc-bg border-b border-ugc-border flex items-center justify-between px-8 sticky top-0 z-20">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-ugc-muted hover:text-white" onclick="toggleMobileMenu()"><i data-lucide="menu" class="w-6 h-6"></i></button>
+                <div>
+                    <h1 class="text-2xl font-bold text-white font-display">Quadro de Tarefas</h1>
+                    <p class="text-xs text-ugc-muted">Gerencie suas produções em estilo Kanban</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="openModal(null)" class="bg-ugc-pink hover:bg-pink-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-ugc-pink/20 hover:scale-105 active:scale-95">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Nova Tarefa</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Kanban Board -->
+        <div class="flex-1 overflow-x-auto overflow-y-auto md:overflow-y-hidden p-8" id="kanban-board-container">
+            <!-- Finance Summary Bar -->
+            <div class="mb-6 flex gap-4 flex-wrap" id="finance-summary">
+                <div class="bg-ugc-card border border-ugc-border rounded-lg p-3 flex items-center gap-3 min-w-max">
+                    <div class="p-2 bg-green-500/10 rounded text-green-400"><i data-lucide="arrow-up-right" class="w-4 h-4"></i></div>
+                    <div>
+                        <p class="text-xs text-ugc-muted">Receitas</p>
+                        <p id="task-finance-income" class="font-bold text-green-400">R$ 0,00</p>
+                    </div>
+                </div>
+                <div class="bg-ugc-card border border-ugc-border rounded-lg p-3 flex items-center gap-3 min-w-max">
+                    <div class="p-2 bg-red-500/10 rounded text-red-400"><i data-lucide="arrow-down-right" class="w-4 h-4"></i></div>
+                    <div>
+                        <p class="text-xs text-ugc-muted">Despesas</p>
+                        <p id="task-finance-expense" class="font-bold text-red-400">R$ 0,00</p>
+                    </div>
+                </div>
+                <div class="bg-ugc-card border border-ugc-border rounded-lg p-3 flex items-center gap-3 min-w-max cursor-pointer hover:border-ugc-pink/50" onclick="window.location.href='finance.html'">
+                    <div class="p-2 bg-blue-500/10 rounded text-blue-400"><i data-lucide="wallet" class="w-4 h-4"></i></div>
+                    <div>
+                        <p class="text-xs text-ugc-muted">Saldo</p>
+                        <p id="task-finance-balance" class="font-bold text-blue-400">R$ 0,00</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-6 h-full pb-4">
+                
+                <!-- Coluna 1: A Fazer (todo) -->
+                <div class="kanban-col flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-4 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-ugc-muted ring-2 ring-ugc-muted/30"></span>
+                            <h3 class="font-bold text-white text-sm uppercase tracking-wide">A Fazer</h3>
+                            <span id="count-todo" class="text-[10px] font-bold text-ugc-muted bg-ugc-card px-2 py-0.5 rounded-full border border-ugc-border">0</span>
+                        </div>
+                        <button onclick="openModal(null)" class="text-ugc-muted hover:text-white transition-colors p-1 hover:bg-ugc-card rounded"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                    </div>
+                    
+                    <div id="col-todo" class="kanban-drop-area flex-1 bg-ugc-sidebar/50 border border-ugc-border/50 rounded-2xl flex flex-col gap-3 overflow-y-auto p-3 custom-scrollbar">
+                        <div class="text-center text-ugc-muted text-xs py-8 opacity-50 flex flex-col items-center">
+                            <i data-lucide="loader-2" class="w-6 h-6 animate-spin mb-2"></i>
+                            Carregando...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna 2: Em Produção (doing) -->
+                <div class="kanban-col flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-4 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-blue-500 ring-2 ring-blue-500/30"></span>
+                            <h3 class="font-bold text-white text-sm uppercase tracking-wide">Produzindo</h3>
+                            <span id="count-doing" class="text-[10px] font-bold text-ugc-muted bg-ugc-card px-2 py-0.5 rounded-full border border-ugc-border">0</span>
+                        </div>
+                    </div>
+                    <div id="col-doing" class="kanban-drop-area flex-1 bg-ugc-sidebar/50 border border-ugc-border/50 rounded-2xl flex flex-col gap-3 overflow-y-auto p-3 custom-scrollbar"></div>
+                </div>
+
+                <!-- Coluna 3: Aprovação (review) -->
+                <div class="kanban-col flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-4 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-yellow-500 ring-2 ring-yellow-500/30"></span>
+                            <h3 class="font-bold text-white text-sm uppercase tracking-wide">Aprovação</h3>
+                            <span id="count-review" class="text-[10px] font-bold text-ugc-muted bg-ugc-card px-2 py-0.5 rounded-full border border-ugc-border">0</span>
+                        </div>
+                    </div>
+                    <div id="col-review" class="kanban-drop-area flex-1 bg-ugc-sidebar/50 border border-ugc-border/50 rounded-2xl flex flex-col gap-3 overflow-y-auto p-3 custom-scrollbar"></div>
+                </div>
+
+                <!-- Coluna 4: Finalizado (done) -->
+                <div class="kanban-col flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-4 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-green-500 ring-2 ring-green-500/30"></span>
+                            <h3 class="font-bold text-white text-sm uppercase tracking-wide">Concluído</h3>
+                            <span id="count-done" class="text-[10px] font-bold text-ugc-muted bg-ugc-card px-2 py-0.5 rounded-full border border-ugc-border">0</span>
+                        </div>
+                    </div>
+                    <div id="col-done" class="kanban-drop-area flex-1 bg-ugc-sidebar/50 border border-ugc-border/50 rounded-2xl flex flex-col gap-3 overflow-y-auto p-3 custom-scrollbar"></div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal Novo/Editar Task -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div id="modal-content" class="bg-ugc-card w-full max-w-md mx-4 rounded-2xl border border-ugc-border shadow-2xl transform scale-95 transition-transform duration-300 p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white" id="modal-title">Novo Task</h3>
+                <button onclick="closeModal()" class="text-ugc-muted hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <form id="task-form" onsubmit="handleSaveTask(event)" class="space-y-4">
+                <input type="hidden" id="task-id"> <!-- ID para edição -->
+                
+                <div>
+                    <label class="block text-xs font-medium text-ugc-muted mb-1.5">Marca / Cliente</label>
+                    <input type="text" id="task-brand" required placeholder="Ex: La Roche Posay" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-ugc-pink focus:ring-1 focus:ring-ugc-pink transition-all placeholder-ugc-muted/50">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-ugc-muted mb-1.5">Tipo</label>
+                        <select id="task-type" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-ugc-pink transition-all appearance-none">
+                            <option value="Reels">Reels</option>
+                            <option value="TikTok">TikTok</option>
+                            <option value="Stories">Stories</option>
+                            <option value="UGC Foto">UGC Foto</option>
+                            <option value="Combo">Combo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-ugc-muted mb-1.5">Valor (R$)</label>
+                        <input type="number" id="task-value" step="0.01" required placeholder="0.00" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-ugc-pink transition-all placeholder-ugc-muted/50">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-ugc-muted mb-1.5">Status</label>
+                    <select id="task-status" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-ugc-pink transition-all appearance-none">
+                        <option value="todo">A Fazer</option>
+                        <option value="doing">Produzindo</option>
+                        <option value="review">Em Aprovação</option>
+                        <option value="done">Concluído</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-ugc-muted mb-1.5">Prazo de Entrega</label>
+                    <input type="date" id="task-date" required class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-ugc-pink transition-all [color-scheme:dark]">
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal()" class="flex-1 bg-transparent border border-ugc-border text-white py-2.5 rounded-lg hover:bg-ugc-hover transition-colors">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-ugc-pink hover:bg-pink-600 text-white font-bold py-2.5 rounded-lg shadow-lg shadow-ugc-pink/20 transition-all transform active:scale-95">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+        // --- CONFIGURAÇÃO DO FIREBASE ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyAP4fQ3TZ09XWggKNKZJDMJQ8TnRdNYwzc",
+          authDomain: "ugcp-9ec19.firebaseapp.com",
+          projectId: "ugcp-9ec19",
+          storageBucket: "ugcp-9ec19.firebasestorage.app",
+          messagingSenderId: "921864203168",
+          appId: "1:921864203168:web:55fb378c2a904737d512c5",
+          measurementId: "G-51WXW579CN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'creatorflow-app'; 
+        let userId = null;
+        let isSidebarCollapsed = false;
+
+        // Auth Listener
+        onAuthStateChanged(auth, async (user) => {
+            if (!user || user.isAnonymous) {
+                try { if (user && user.isAnonymous) await signOut(auth); } catch(e){}
+                window.location.href = './index.html';
+                return;
+            }
+            userId = user.uid;
+            
+            // Atualiza Perfil
+            const name = user.displayName || user.email.split('@')[0];
+            document.getElementById('profile-name').innerText = name;
+            document.getElementById('profile-email').innerText = user.email;
+            if(user.photoURL) document.getElementById('profile-avatar').src = user.photoURL;
+
+            setupRealtimeListener();
+        });
+
+        // Logout
+        window.logout = async () => {
+            try { await signOut(auth); window.location.href = './index.html'; }
+            catch (e) { console.error('Logout erro', e); }
+        }
+
+        // Listener Realtime
+        function setupRealtimeListener() {
+            if (!userId) return;
+            
+            // Tasks Listener
+            const tasksCollection = collection(db, 'artifacts', appId, 'users', userId, 'tasks');
+            
+            onSnapshot(tasksCollection, (snapshot) => {
+                const tasks = [];
+                snapshot.forEach((doc) => {
+                    tasks.push({ id: doc.id, ...doc.data() });
+                });
+                
+                tasks.sort((a, b) => {
+                    const dateA = a.createdAt?.seconds || 0;
+                    const dateB = b.createdAt?.seconds || 0;
+                    return dateB - dateA;
+                });
+                
+                renderBoard(tasks);
+            }, (error) => {
+                console.error("Erro ao buscar dados:", error);
+            });
+
+            // Finance Listener
+            loadFinanceDataForTasks();
+        }
+
+        async function loadFinanceDataForTasks() {
+            try {
+                const { query: qBuilder, orderBy: orderByFn } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js').then(m => ({ query: m.query, orderBy: m.orderBy }));
+                const q = qBuilder(collection(db, 'artifacts', appId, 'users', userId, 'transactions'), orderByFn('date', 'desc'));
+                
+                onSnapshot(q, (snapshot) => {
+                    let income = 0, expense = 0;
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const val = parseFloat(data.amount);
+                        if (data.type === 'income') income += val;
+                        else if (data.type === 'expense') expense += val;
+                    });
+                    
+                    const balance = income - expense;
+                    document.getElementById('task-finance-income').innerText = `R$ ${income.toFixed(2).replace('.', ',')}`;
+                    document.getElementById('task-finance-expense').innerText = `R$ ${expense.toFixed(2).replace('.', ',')}`;
+                    document.getElementById('task-finance-balance').innerText = `R$ ${balance.toFixed(2).replace('.', ',')}`;
+                });
+            } catch(e) { console.error('Finance data error:', e); }
+        }
+
+        // Renderização Kanban
+        function renderBoard(tasks) {
+            const cols = { todo: [], doing: [], review: [], done: [] };
+            
+            tasks.forEach(task => {
+                const status = task.status || 'todo';
+                if (cols[status]) cols[status].push(task);
+            });
+
+            for (const [status, items] of Object.entries(cols)) {
+                const container = document.getElementById(`col-${status}`);
+                const counter = document.getElementById(`count-${status}`);
+                
+                if(counter) counter.innerText = items.length;
+                if(container) {
+                    container.innerHTML = '';
+                    items.forEach(task => {
+                        const card = document.createElement('div');
+                        card.className = 'kanban-card bg-ugc-card p-4 rounded-xl border border-ugc-border hover:border-ugc-pink/50 group relative mb-3';
+                        
+                        // Ao clicar, abre modal de edição
+                        card.onclick = () => openModal(task);
+
+                        // Tags Colors
+                        let tagColor = 'bg-gray-500/10 text-gray-400 border-gray-500/20';
+                        if (task.type === 'TikTok') tagColor = 'bg-purple-500/20 text-purple-400 border-purple-500/20';
+                        if (task.type === 'Reels') tagColor = 'bg-blue-500/20 text-blue-400 border-blue-500/20';
+                        if (task.type === 'Stories') tagColor = 'bg-orange-500/20 text-orange-400 border-orange-500/20';
+                        if (task.type === 'UGC Foto') tagColor = 'bg-green-500/20 text-green-400 border-green-500/20';
+
+                        // Format Date
+                        let dateStr = '--/--';
+                        if (task.date) {
+                            const [y, m, d] = task.date.split('-');
+                            dateStr = `${d}/${m}`;
+                        }
+
+                        // Delete Button
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = "text-ugc-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity absolute top-3 right-3 p-1 rounded hover:bg-ugc-bg";
+                        deleteBtn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i>';
+                        deleteBtn.onclick = (e) => {
+                            e.stopPropagation(); 
+                            deleteTask(task.id);
+                        };
+
+                        card.innerHTML = `
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="${tagColor} text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider">${task.type}</span>
+                            </div>
+                            <h4 class="text-white font-bold mb-1 line-clamp-2">${task.brand}</h4>
+                            <div class="flex items-center gap-2 text-ugc-muted text-xs mt-3 pt-3 border-t border-ugc-border/50">
+                                <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${dateStr}</span>
+                                <span class="ml-auto text-white font-medium">R$ ${Number(task.value).toFixed(2)}</span>
+                            </div>
+                        `;
+                        card.appendChild(deleteBtn);
+                        container.appendChild(card);
+                    });
+                }
+            }
+            lucide.createIcons();
+        }
+
+        // Abrir Modal (Criar ou Editar)
+        window.openModal = (task) => {
+            const o = document.getElementById('modal-overlay');
+            const c = document.getElementById('modal-content');
+            const form = document.getElementById('task-form');
+            const title = document.getElementById('modal-title');
+
+            if (task) {
+                // Editar
+                title.innerText = "Editar Task";
+                document.getElementById('task-id').value = task.id;
+                document.getElementById('task-brand').value = task.brand;
+                document.getElementById('task-type').value = task.type;
+                document.getElementById('task-value').value = task.value;
+                document.getElementById('task-status').value = task.status || 'todo';
+                document.getElementById('task-date').value = task.date;
+            } else {
+                // Novo
+                title.innerText = "Novo Task";
+                form.reset();
+                document.getElementById('task-id').value = "";
+                document.getElementById('task-status').value = 'todo';
+                document.getElementById('task-date').value = new Date().toLocaleDateString('en-CA');
+            }
+
+            o.classList.remove('hidden'); 
+            setTimeout(()=>{o.classList.remove('opacity-0');c.classList.remove('scale-95');c.classList.add('scale-100');},10);
+        }
+        
+        window.closeModal = () => { 
+            const o=document.getElementById('modal-overlay'), c=document.getElementById('modal-content'); 
+            o.classList.add('opacity-0'); c.classList.remove('scale-100'); c.classList.add('scale-95'); 
+            setTimeout(()=>{o.classList.add('hidden');document.getElementById('task-form').reset();},300); 
+        }
+
+        // Salvar Task
+        window.handleSaveTask = async function(e) {
+            e.preventDefault();
+            if (!userId) return;
+
+            const id = document.getElementById('task-id').value;
+            const brand = document.getElementById('task-brand').value;
+            const type = document.getElementById('task-type').value;
+            const value = document.getElementById('task-value').value;
+            const status = document.getElementById('task-status').value;
+            const date = document.getElementById('task-date').value;
+
+            const btn = document.querySelector('#task-form button[type="submit"]');
+            const originalText = btn.innerText;
+            btn.innerText = "Salvando...";
+            btn.disabled = true;
+
+            try {
+                if (id) {
+                    // Update
+                    await updateDoc(doc(db, 'artifacts', appId, 'users', userId, 'tasks', id), {
+                        brand, type, value, status, date, updatedAt: new Date()
+                    });
+                    
+                    // Se foi movido para 'done', adiciona anotação na transação
+                    if (status === 'done') {
+                        await syncTaskCompletionToFinance(id, brand, type, value, date);
+                    }
+                    
+                    showToast('Tarefa atualizada!');
+                } else {
+                    // Create - Também cria transação no Finance
+                    const taskRef = await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'tasks'), {
+                        brand, type, value, date, status: status || 'todo', createdAt: new Date()
+                    });
+                    
+                    // Criar transação de receita prevista no Finance
+                    await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'transactions'), {
+                        type: 'income',
+                        description: `${brand} - ${type}`,
+                        amount: value,
+                        date: date,
+                        category: 'UGC',
+                        createdAt: new Date(),
+                        linkedTaskId: taskRef.id
+                    });
+                    
+                    showToast('Tarefa e receita criadas!');
+                }
+                closeModal();
+            } catch (error) {
+                console.error("Erro ao salvar:", error);
+                showToast("Erro ao salvar tarefa.");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function deleteTask(id) {
+            if(confirm('Tem certeza que deseja excluir esta tarefa?')) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'tasks', id));
+                    showToast('Tarefa excluída.');
+                } catch (error) {
+                    console.error("Erro ao deletar:", error);
+                    showToast("Erro ao excluir.");
+                }
+            }
+        }
+
+        // Sincroniza conclusão de task com Finance
+        async function syncTaskCompletionToFinance(taskId, brand, type, value, date) {
+            try {
+                // Procura por transação vinculada
+                const { query: qBuilder, where } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js').then(m => ({ query: m.query, where: m.where }));
+                
+                const q = qBuilder(
+                    collection(db, 'artifacts', appId, 'users', userId, 'transactions'),
+                    where('linkedTaskId', '==', taskId)
+                );
+                
+                onSnapshot(q, async (snapshot) => {
+                    if (!snapshot.empty) {
+                        // Atualiza transação existente
+                        const transactionDoc = snapshot.docs[0];
+                        await updateDoc(transactionDoc.ref, {
+                            description: `✓ ${brand} - ${type} (Concluído)`,
+                            updatedAt: new Date()
+                        });
+                    }
+                }, { once: true });
+            } catch(e) { console.error('Sync error:', e); }
+        }
+
+        // UI Helpers
+        window.toggleSidebarDesktop = () => {
+            const s=document.getElementById('sidebar'), i=document.getElementById('sidebar-toggle-icon'); 
+            isSidebarCollapsed=!isSidebarCollapsed; 
+            if(isSidebarCollapsed){s.classList.add('w-20','sidebar-collapsed');s.classList.remove('w-64');i.style.transform='rotate(180deg)'}
+            else{s.classList.remove('w-20','sidebar-collapsed');s.classList.add('w-64');i.style.transform='rotate(0deg)'}
+        }
+        window.toggleMobileMenu = () => { 
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('mobile-overlay');
+            sb.classList.toggle('open');
+            ov.classList.toggle('hidden');
+        }
+        
+        window.showToast = (m) => {
+            const c=document.getElementById('toast-container'), t=document.createElement('div');
+            t.className='toast bg-ugc-card border border-ugc-pink/30 text-white px-4 py-3 rounded-xl shadow-2xl flex gap-3 min-w-[300px] pointer-events-auto items-center';
+            t.innerHTML=`<div class="bg-ugc-pink/20 p-1.5 rounded-full text-ugc-pink"><i data-lucide="check" class="w-4 h-4"></i></div><span class="text-sm font-medium">${m}</span>`;
+            c.appendChild(t); lucide.createIcons();
+            setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(20px)';setTimeout(()=>t.remove(),300)},3000);
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

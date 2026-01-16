@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creatorflow - Contratos</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Biblioteca para gerar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        ugc: {
+                            bg: '#141414', sidebar: '#0F0F0F', card: '#1E1E1E', pink: '#E65696', purple: '#9D66E3',
+                            text: '#EAEAEA', muted: '#A0A0A0', border: '#2A2A2A', hover: '#252525'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #141414; color: #EAEAEA; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #141414; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(230, 86, 150, 0.15) 0%, rgba(157, 102, 227, 0.05) 100%);
+            border-left: 3px solid #E65696; color: #E65696;
+        }
+
+        .gradient-btn {
+            background: linear-gradient(90deg, #E65696 0%, #9D66E3 100%);
+            transition: all 0.3s ease;
+        }
+        .gradient-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .gradient-btn:active { transform: translateY(0); }
+
+        .tab-btn.active {
+            background-color: rgba(230, 86, 150, 0.1);
+            color: #E65696;
+            border-color: #E65696;
+        }
+
+        /* Folha A4 para Preview */
+        .a4-page {
+            width: 100%;
+            max-width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 0 auto;
+            background: white;
+            color: black;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        .a4-page h1 { font-size: 16pt; font-weight: bold; text-align: center; margin-bottom: 20px; }
+        .a4-page h2 { font-size: 14pt; font-weight: bold; margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid #000; padding-bottom: 5px; }
+        .a4-page p { margin-bottom: 10px; text-align: justify; }
+        .a4-page ul { margin-bottom: 10px; padding-left: 20px; }
+        .a4-page li { margin-bottom: 5px; }
+        .contract-highlight { background-color: #e6e6e6; padding: 0 2px; }
+
+        .sidebar-collapsed .sidebar-text { display: none; }
+        .sidebar-collapsed .logo-text { display: none; }
+        .sidebar-collapsed .nav-item { justify-content: center; }
+        .sidebar-collapsed .nav-item i { margin-right: 0; }
+        .sidebar-collapsed .section-label { display: none; }
+
+        /* Estilo da Sidebar Mobile */
+        .sidebar-mobile { transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+        .sidebar-mobile.open { transform: translateX(0); }
+
+        /* Esconder scrollbar nas abas horizontais */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-sm">
+
+    <!-- Overlay Mobile -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden backdrop-blur-sm transition-opacity duration-300" onclick="toggleMobileMenu()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-ugc-sidebar border-r border-ugc-border flex flex-col sidebar-mobile md:translate-x-0 md:static transition-transform duration-300 ease-in-out group/sidebar shadow-2xl md:shadow-none">
+        <div class="h-20 flex items-center justify-between px-6 border-b border-ugc-border/50 relative">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-ugc-pink to-ugc-purple flex items-center justify-center shrink-0 shadow-lg shadow-ugc-pink/20">
+                    <i data-lucide="sparkles" class="text-white w-4 h-4"></i>
+                </div>
+                <span class="font-display font-bold text-lg tracking-wide text-white">Creatorflow</span>
+            </div>
+            
+            <!-- Botão Fechar Mobile -->
+            <button onclick="toggleMobileMenu()" class="md:hidden text-ugc-muted hover:text-white p-2 hover:bg-ugc-hover rounded-lg transition-colors absolute right-4">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            
+            <button onclick="toggleSidebarDesktop()" class="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-ugc-card border border-ugc-border rounded-full items-center justify-center text-ugc-muted hover:text-white hover:border-ugc-pink transition-colors z-50">
+                <i id="sidebar-toggle-icon" data-lucide="chevron-left" class="w-3 h-3 transition-transform duration-300"></i>
+            </button>
+        </div>
+
+        <nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto overflow-x-hidden">
+            <p class="section-label px-3 text-[10px] font-bold text-ugc-muted uppercase tracking-wider mb-2 mt-2 truncate">Principal</p>
+            <a href="creatorflow.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Dashboard</span>
+            </a>
+            <a href="planner.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Planner">
+                <i data-lucide="calendar" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Planner</span>
+            </a>
+            <a href="tasks.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Tasks">
+                <i data-lucide="briefcase" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Tasks</span>
+            </a>
+
+            <p class="section-label px-3 text-[10px] font-bold text-ugc-muted uppercase tracking-wider mb-2 mt-6 truncate">Criação</p>
+            <a href="scripts.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Roteiros IA">
+                <i data-lucide="file-text" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Roteiros IA</span>
+            </a>
+            <p class="section-label px-3 text-[10px] font-bold text-ugc-muted uppercase tracking-wider mb-2 mt-6 truncate">Gestão</p>
+            <a href="contracts.html" class="nav-item active w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Contratos">
+                <i data-lucide="file-signature" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Contratos</span>
+            </a>
+            <a href="finance.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Financeiro">
+                <i data-lucide="dollar-sign" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Financeiro</span>
+            </a>
+            <a href="pricing_simulator.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Simulador de Preço">
+                <i data-lucide="calculator" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Simulador de Preço</span>
+            </a>
+        </nav>
+        
+        <div class="p-4 border-t border-ugc-border">
+            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-ugc-hover cursor-pointer transition-colors" title="Perfil">
+                <img id="profile-avatar" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Perfil" class="w-9 h-9 rounded-full border border-ugc-border shrink-0">
+                <div class="flex-1 min-w-0 user-info transition-opacity duration-300">
+                    <p id="profile-name" class="text-sm font-medium text-white truncate">Carregando...</p>
+                    <p id="profile-email" class="text-xs text-ugc-muted truncate">...</p>
+                </div>
+                <button onclick="logout()" title="Sair" class="ml-auto p-1.5 rounded hover:bg-ugc-hover text-ugc-muted hover:text-white transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 bg-ugc-bg overflow-y-auto relative transition-all duration-300">
+        <!-- Mobile Header -->
+        <header class="md:hidden h-16 bg-ugc-card border-b border-ugc-border flex items-center justify-between px-4 sticky top-0 z-20">
+            <div class="flex items-center gap-2">
+                <i data-lucide="sparkles" class="text-ugc-pink w-5 h-5"></i>
+                <span class="font-bold text-white">Creatorflow</span>
+            </div>
+            <button onclick="toggleMobileMenu()" class="text-ugc-muted hover:text-white p-2 rounded-lg active:bg-ugc-hover"><i data-lucide="menu" class="w-6 h-6"></i></button>
+        </header>
+
+        <div class="p-6 md:p-10 max-w-7xl mx-auto w-full min-h-screen flex flex-col">
+            
+            <header class="mb-8">
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-display font-bold text-white mb-2 flex items-center gap-3">
+                            Contratos & Documentos
+                        </h1>
+                        <p class="text-ugc-muted text-sm md:text-base">Gerencie seus contratos e gere novos documentos automaticamente.</p>
+                    </div>
+                    
+                    <!-- Tabs (Mobile Optimized) -->
+                    <div class="bg-ugc-card p-1 rounded-xl border border-ugc-border overflow-x-auto hide-scrollbar">
+                        <div class="flex min-w-max">
+                            <button onclick="switchTab('library')" id="btn-tab-library" class="tab-btn active px-4 py-2 rounded-lg text-xs font-semibold text-ugc-muted hover:text-white flex items-center gap-2 transition-all border border-transparent whitespace-nowrap">
+                                <i data-lucide="library" class="w-4 h-4"></i> Biblioteca
+                            </button>
+                            <button onclick="switchTab('generator')" id="btn-tab-generator" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-ugc-muted hover:text-white flex items-center gap-2 transition-all border border-transparent whitespace-nowrap">
+                                <i data-lucide="file-plus" class="w-4 h-4"></i> Novo Contrato
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- TAB 1: BIBLIOTECA -->
+            <div id="tab-library" class="h-full w-full animate-fade-in">
+                <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Cards injetados via JS -->
+                    <div class="col-span-full text-center py-20 text-ugc-muted border border-ugc-border border-dashed rounded-xl">
+                        <i data-lucide="file-signature" class="w-10 h-10 mx-auto mb-4 opacity-50"></i>
+                        <p>Nenhum contrato salvo.</p>
+                        <button onclick="switchTab('generator')" class="mt-4 text-ugc-pink hover:underline text-xs">Criar primeiro contrato</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: GERADOR DE CONTRATO -->
+            <div id="tab-generator" class="hidden h-full flex-col lg:flex-row gap-8 animate-fade-in">
+                <!-- Formulário -->
+                <div class="w-full lg:w-1/3 space-y-6 h-fit">
+                    <div class="bg-ugc-card border border-ugc-border rounded-xl p-6 shadow-lg">
+                        <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                            <i data-lucide="edit-3" class="w-4 h-4 text-ugc-pink"></i> Dados do Contrato
+                        </h3>
+                        <form id="contract-form" class="space-y-4">
+                            
+                            <div class="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-ugc-muted mb-1">Contratante (Marca)</label>
+                                    <input type="text" id="brand-name" oninput="updatePreview()" placeholder="Ex: Natura" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-ugc-pink transition-all text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-ugc-muted mb-1">Seu Nome (Contratada)</label>
+                                    <input type="text" id="creator-name" oninput="updatePreview()" placeholder="Seu nome" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-ugc-pink transition-all text-sm">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-ugc-muted mb-1">Tipo de Conteúdo</label>
+                                    <input type="text" id="content-type" oninput="updatePreview()" value="UGC orgânico" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-ugc-pink transition-all text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-ugc-muted mb-1">Plataforma</label>
+                                    <input type="text" id="platform" oninput="updatePreview()" value="Instagram" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-ugc-pink transition-all text-sm">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-ugc-muted mb-1">Quantidade</label>
+                                    <input type="text" id="quantity" oninput="updatePreview()" value="1 vídeo" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-ugc-pink transition-all text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-ugc-muted mb-1">Duração</label>
+                                    <input type="text" id="duration" oninput="updatePreview()" value="15 a 30 segundos" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-ugc-pink transition-all text-sm">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-ugc-muted mb-1">Data de Entrega</label>
+                                    <input type="date" id="delivery-date" oninput="updatePreview()" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-ugc-pink transition-all text-sm [color-scheme:dark]">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-ugc-muted mb-1">Valor Total (R$)</label>
+                                    <input type="number" id="value" oninput="updatePreview()" placeholder="0,00" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-ugc-pink transition-all text-sm">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-ugc-muted mb-1">Direitos de Uso</label>
+                                <select id="usage-rights" onchange="updatePreview()" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-ugc-pink transition-all text-sm">
+                                    <option value="Apenas orgânico">Apenas orgânico (Sem anúncios)</option>
+                                    <option value="Orgânico + Ads (30 dias)">Orgânico + Ads (30 dias)</option>
+                                    <option value="Direitos Totais (Buyout)">Direitos Totais (Buyout)</option>
+                                </select>
+                            </div>
+
+                            <div class="pt-4 flex gap-3 flex-col">
+                                <button type="button" onclick="downloadPDF()" class="w-full gradient-btn text-white font-bold py-3 rounded-lg shadow-lg shadow-ugc-pink/20 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-transform">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                    Baixar PDF Assinável
+                                </button>
+                                <button type="button" onclick="saveContract()" class="w-full bg-ugc-bg border border-ugc-border hover:border-ugc-pink text-white font-medium py-2 rounded-lg transition-all flex items-center justify-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i>
+                                    Salvar na Biblioteca
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Preview Section -->
+                <div class="w-full lg:w-2/3 bg-gray-500/10 rounded-xl p-4 md:p-8 overflow-y-auto max-h-[800px] border border-ugc-border">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-xs text-ugc-muted uppercase font-bold tracking-wider">Pré-visualização (A4)</span>
+                        <div class="flex gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Folha A4 Digital -->
+                    <div id="contract-preview" class="a4-page">
+                        <h1>CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE CRIAÇÃO DE CONTEÚDO</h1>
+                        
+                        <p style="text-align: right;">Data: <span id="prev-date">--/--/----</span></p>
+                        
+                        <br>
+                        
+                        <h2>PARTES</h2>
+                        <p>
+                            <strong>CONTRATADA (Criadora):</strong> <span id="prev-creator">____________________</span><br>
+                            <strong>CONTRATANTE (Marca):</strong> <span id="prev-brand">____________________</span>
+                        </p>
+
+                        <h2>1. OBJETO DO CONTRATO</h2>
+                        <p>Este contrato tem por objeto a prestação de serviços de criação de conteúdo digital pela CONTRATADA para a CONTRATANTE, conforme especificações abaixo descritas.</p>
+
+                        <h2>2. ESCOPO DO SERVIÇO</h2>
+                        <ul>
+                            <li><strong>Tipo de conteúdo:</strong> <span id="prev-type">UGC orgânico</span></li>
+                            <li><strong>Quantidade:</strong> <span id="prev-qty">1 vídeo</span></li>
+                            <li><strong>Plataforma(s):</strong> <span id="prev-platform">Instagram</span></li>
+                            <li><strong>Duração:</strong> <span id="prev-duration">15 a 30 segundos</span></li>
+                        </ul>
+                        <p>A CONTRATADA se compromete a entregar o conteúdo conforme briefing acordado previamente entre as partes.</p>
+
+                        <h2>3. PRAZO DE ENTREGA</h2>
+                        <p>O conteúdo deverá ser entregue até a data de <strong><span id="prev-delivery">--/--/----</span></strong>.</p>
+                        <p>A CONTRATANTE terá prazo de 48 horas para solicitar ajustes. Após aprovação ou decorrido o prazo sem manifestação, o conteúdo será considerado aprovado.</p>
+
+                        <h2>4. DIREITOS DE USO</h2>
+                        <p>A CONTRATANTE poderá utilizar o conteúdo entregue conforme os seguintes termos:</p>
+                        <ul>
+                            <li><strong>Tipo de uso:</strong> <span id="prev-rights">Apenas orgânico</span></li>
+                        </ul>
+                        <p id="prev-rights-note">O conteúdo não poderá ser utilizado em campanhas de mídia paga.</p>
+                        <p>A CONTRATADA mantém os direitos autorais sobre a obra, cedendo apenas os direitos de uso conforme estabelecido acima.</p>
+
+                        <h2>5. VALOR E FORMA DE PAGAMENTO</h2>
+                        <ul>
+                            <li><strong>Valor total:</strong> R$ <span id="prev-value">0,00</span></li>
+                            <li><strong>Forma de pagamento:</strong> Pix</li>
+                        </ul>
+                        <p>O pagamento deverá ser realizado em até 7 dias após a aprovação do conteúdo.</p>
+
+                        <h2>6. RESCISÃO</h2>
+                        <p>Este contrato poderá ser rescindido:</p>
+                        <ul>
+                            <li>a) Por acordo mútuo entre as partes;</li>
+                            <li>b) Por descumprimento de qualquer cláusula, mediante notificação prévia de 48 horas;</li>
+                            <li>c) Em caso de cancelamento pela CONTRATANTE após início da produção, será devido 50% do valor acordado.</li>
+                        </ul>
+
+                        <h2>7. ACEITE DIGITAL</h2>
+                        <p>Este contrato entra em vigor a partir do aceite digital entre as partes, dispensando assinatura física.</p>
+                        <p>O aceite pode ser dado por:<br>
+                        • Resposta afirmativa por escrito (e-mail, mensagem)<br>
+                        • Realização do pagamento</p>
+
+                        <br><br><br>
+                        <div style="display: flex; justify-content: space-between;">
+                            <div style="text-align: center; width: 45%; border-top: 1px solid black; padding-top: 5px;">
+                                <span id="prev-sig-creator">Criadora</span><br>
+                                Criadora de Conteúdo
+                            </div>
+                            <div style="text-align: center; width: 45%; border-top: 1px solid black; padding-top: 5px;">
+                                <span id="prev-sig-brand">Marca</span><br>
+                                Marca Contratante
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAP4fQ3TZ09XWggKNKZJDMJQ8TnRdNYwzc",
+          authDomain: "ugcp-9ec19.firebaseapp.com",
+          projectId: "ugcp-9ec19",
+          storageBucket: "ugcp-9ec19.firebasestorage.app",
+          messagingSenderId: "921864203168",
+          appId: "1:921864203168:web:55fb378c2a904737d512c5",
+          measurementId: "G-51WXW579CN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'creatorflow-app';
+        let userId = null;
+        let isSidebarCollapsed = false;
+
+        // Auth
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.isAnonymous) {
+                window.location.href = './index.html';
+                return;
+            }
+            userId = user.uid;
+            
+            // Perfil
+            const name = user.displayName || user.email.split('@')[0];
+            document.getElementById('profile-name').innerText = name;
+            document.getElementById('profile-email').innerText = user.email;
+            if(user.photoURL) document.getElementById('profile-avatar').src = user.photoURL;
+
+            // Auto-fill creator name
+            document.getElementById('creator-name').value = name;
+            document.getElementById('prev-date').innerText = new Date().toLocaleDateString('pt-BR');
+            updatePreview();
+
+            // Inicia Listener da Biblioteca
+            setupLibraryListener();
+        });
+
+        // --- PREVIEW LOGIC ---
+        window.updatePreview = () => {
+            const getVal = (id) => document.getElementById(id).value;
+            const setTxt = (id, txt) => {
+                const el = document.getElementById(id);
+                if(el) el.innerText = txt || "____________________";
+            };
+
+            setTxt('prev-brand', getVal('brand-name'));
+            setTxt('prev-creator', getVal('creator-name'));
+            setTxt('prev-type', getVal('content-type'));
+            setTxt('prev-qty', getVal('quantity'));
+            setTxt('prev-platform', getVal('platform'));
+            setTxt('prev-duration', getVal('duration'));
+            setTxt('prev-sig-creator', getVal('creator-name'));
+            setTxt('prev-sig-brand', getVal('brand-name'));
+            
+            const val = getVal('value');
+            setTxt('prev-value', val ? Number(val).toLocaleString('pt-BR', {minimumFractionDigits: 2}) : "0,00");
+
+            const date = getVal('delivery-date');
+            if(date) {
+                const [y, m, d] = date.split('-');
+                setTxt('prev-delivery', `${d}/${m}/${y}`);
+            } else {
+                setTxt('prev-delivery', "--/--/----");
+            }
+
+            const rights = getVal('usage-rights');
+            setTxt('prev-rights', rights);
+            const rightsNote = document.getElementById('prev-rights-note');
+            if(rights.includes("Ads") || rights.includes("Totais")) {
+                rightsNote.style.display = "none";
+            } else {
+                rightsNote.style.display = "block";
+            }
+        }
+
+        // --- PDF DOWNLOAD ---
+        window.downloadPDF = () => {
+            const element = document.getElementById('contract-preview');
+            const brand = document.getElementById('brand-name').value || "Contrato";
+            const opt = {
+                margin: 0,
+                filename: `Contrato_${brand}_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            // Temporary style fix for PDF generation
+            const originalShadow = element.style.boxShadow;
+            element.style.boxShadow = 'none';
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.style.boxShadow = originalShadow;
+                showToast("PDF baixado com sucesso!");
+            });
+        }
+
+        // --- SAVE & LIBRARY ---
+        window.saveContract = async () => {
+            if (!userId) return;
+            const brand = document.getElementById('brand-name').value;
+            if(!brand) return alert("Preencha o nome da marca.");
+
+            const contractData = {
+                brand: brand,
+                creator: document.getElementById('creator-name').value,
+                type: document.getElementById('content-type').value,
+                platform: document.getElementById('platform').value,
+                value: document.getElementById('value').value,
+                date: document.getElementById('delivery-date').value,
+                createdAt: new Date()
+            };
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'contracts'), contractData);
+                showToast('Contrato salvo na biblioteca!');
+                switchTab('library');
+            } catch (e) {
+                console.error(e); showToast('Erro ao salvar.');
+            }
+        }
+
+        function setupLibraryListener() {
+            const q = query(collection(db, 'artifacts', appId, 'users', userId, 'contracts'), orderBy('createdAt', 'desc'));
+            
+            onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('library-grid');
+                
+                if (snapshot.empty) {
+                    list.innerHTML = `
+                        <div class="col-span-full flex flex-col items-center justify-center py-20 text-ugc-muted border border-ugc-border border-dashed rounded-xl">
+                            <i data-lucide="file-signature" class="w-10 h-10 mb-2 opacity-50"></i>
+                            <p>Sua biblioteca está vazia.</p>
+                            <button onclick="switchTab('generator')" class="mt-4 text-ugc-pink hover:underline text-xs">Criar primeiro contrato</button>
+                        </div>`;
+                    lucide.createIcons();
+                    return;
+                }
+
+                list.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const date = data.createdAt?.toDate().toLocaleDateString('pt-BR') || '--/--';
+                    
+                    const card = document.createElement('div');
+                    card.className = 'bg-ugc-card border border-ugc-border rounded-xl p-5 hover:border-ugc-pink/30 transition-all group relative';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="p-2 bg-ugc-bg rounded-lg border border-ugc-border"><i data-lucide="file-text" class="w-5 h-5 text-ugc-pink"></i></div>
+                            <button onclick="deleteContract('${doc.id}')" class="p-1.5 hover:bg-ugc-bg rounded text-ugc-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Excluir"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                        <h4 class="font-bold text-white mb-1 text-lg">${data.brand}</h4>
+                        <p class="text-xs text-ugc-muted mb-4">Criado em ${date}</p>
+                        
+                        <div class="text-sm text-ugc-muted space-y-1 mb-4">
+                            <p>• ${data.type}</p>
+                            <p>• ${data.platform}</p>
+                            <p class="text-white font-medium">• R$ ${data.value || '0,00'}</p>
+                        </div>
+
+                        <button onclick="loadContractData('${encodeURIComponent(JSON.stringify(data))}')" class="w-full bg-ugc-bg border border-ugc-border hover:border-ugc-pink text-white text-xs font-bold py-2 rounded-lg transition-colors">
+                            Reutilizar / Gerar PDF
+                        </button>
+                    `;
+                    list.appendChild(card);
+                });
+                lucide.createIcons();
+            });
+        }
+
+        window.deleteContract = async (id) => {
+            if(confirm('Excluir este contrato permanentemente?')) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'contracts', id));
+                    showToast('Contrato excluído.');
+                } catch(e) { console.error(e); }
+            }
+        }
+
+        window.loadContractData = (jsonStr) => {
+            const data = JSON.parse(decodeURIComponent(jsonStr));
+            document.getElementById('brand-name').value = data.brand;
+            document.getElementById('creator-name').value = data.creator;
+            document.getElementById('content-type').value = data.type;
+            document.getElementById('platform').value = data.platform;
+            document.getElementById('value').value = data.value;
+            if(data.date) document.getElementById('delivery-date').value = data.date;
+            
+            updatePreview();
+            switchTab('generator');
+            showToast('Dados carregados no gerador!');
+        }
+
+        // --- TABS & UI ---
+        window.switchTab = (tabName) => {
+            ['generator', 'library'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('flex'); // remove flex for generator
+                document.getElementById(`btn-tab-${t}`).classList.remove('active');
+            });
+            const tab = document.getElementById(`tab-${tabName}`);
+            tab.classList.remove('hidden');
+            if(tabName === 'generator') tab.classList.add('flex'); // generator needs flex
+            document.getElementById(`btn-tab-${tabName}`).classList.add('active');
+        };
+
+        // Helpers
+        window.toggleSidebarDesktop = () => {
+            const s=document.getElementById('sidebar'), i=document.getElementById('sidebar-toggle-icon'); isSidebarCollapsed=!isSidebarCollapsed; 
+            if(isSidebarCollapsed){s.classList.add('w-20','sidebar-collapsed');s.classList.remove('w-64');i.style.transform='rotate(180deg)'}
+            else{s.classList.remove('w-20','sidebar-collapsed');s.classList.add('w-64');i.style.transform='rotate(0deg)'}
+        }
+        
+        window.toggleMobileMenu = () => { 
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            sidebar.classList.toggle('open');
+            // Toggle do overlay baseado na classe da sidebar ou manualmente
+            if (sidebar.classList.contains('open')) {
+                overlay.classList.remove('hidden');
+            } else {
+                overlay.classList.add('hidden');
+            }
+        }
+        
+        // Auto-close menu on link click (mobile)
+        document.querySelectorAll('.nav-item').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 768) { // md breakpoint
+                    toggleMobileMenu();
+                }
+            });
+        });
+
+        window.showToast = (m) => { const c=document.getElementById('toast-container'), t=document.createElement('div'); t.className='toast bg-ugc-card border border-ugc-pink/30 text-white px-4 py-3 rounded-lg shadow-xl flex gap-3 min-w-[300px] pointer-events-auto items-center'; t.innerHTML=`<div class="bg-ugc-pink/20 p-1.5 rounded-full text-ugc-pink"><i data-lucide="check" class="w-4 h-4"></i></div><span class="text-sm font-medium">${m}</span>`; c.appendChild(t); lucide.createIcons(); setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(20px)';setTimeout(()=>t.remove(),300)},3000); }
+        window.logout = async () => { try { await signOut(auth); window.location.href = './index.html'; } catch(e){console.error(e);} }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creatorflow - Roteiros</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        ugc: {
+                            bg: '#141414', sidebar: '#0F0F0F', card: '#1E1E1E', pink: '#E65696', purple: '#9D66E3',
+                            text: '#EAEAEA', muted: '#A0A0A0', border: '#2A2A2A', hover: '#252525'
+                        }
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #141414; color: #EAEAEA; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #141414; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(230, 86, 150, 0.15) 0%, rgba(157, 102, 227, 0.05) 100%);
+            border-left: 3px solid #E65696; color: #E65696;
+        }
+
+        .gradient-btn {
+            background: linear-gradient(90deg, #E65696 0%, #9D66E3 100%);
+            transition: all 0.3s ease;
+        }
+        .gradient-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .gradient-btn:active { transform: translateY(0); }
+
+        .tab-btn.active {
+            background-color: rgba(230, 86, 150, 0.1);
+            color: #E65696;
+            border-color: #E65696;
+        }
+
+        /* Sidebar collapsed logic */
+        .sidebar-collapsed .sidebar-text { display: none; }
+        .sidebar-collapsed .logo-text { display: none; }
+        .sidebar-collapsed .nav-item { justify-content: center; }
+        .sidebar-collapsed .nav-item i { margin-right: 0; }
+        .sidebar-collapsed .section-label { display: none; }
+
+        /* Estilo da Sidebar Mobile */
+        .sidebar-mobile { transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+        .sidebar-mobile.open { transform: translateX(0); }
+
+        /* Esconder scrollbar nas abas horizontais */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-sm">
+
+    <!-- Overlay Mobile (Fundo escuro ao abrir menu) -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden backdrop-blur-sm transition-opacity duration-300" onclick="toggleMobileMenu()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-ugc-sidebar border-r border-ugc-border flex flex-col sidebar-mobile md:translate-x-0 md:static transition-transform duration-300 ease-in-out group/sidebar shadow-2xl md:shadow-none">
+        <div class="h-20 flex items-center justify-between px-6 border-b border-ugc-border/50 relative">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-ugc-pink to-ugc-purple flex items-center justify-center shrink-0 shadow-lg shadow-ugc-pink/20">
+                    <i data-lucide="sparkles" class="text-white w-4 h-4"></i>
+                </div>
+                <span class="font-display font-bold text-lg tracking-wide text-white">Creatorflow</span>
+            </div>
+            
+            <!-- Botão Fechar Mobile (CORRIGIDO) -->
+            <button onclick="toggleMobileMenu()" class="md:hidden text-ugc-muted hover:text-white p-2 hover:bg-ugc-hover rounded-lg transition-colors absolute right-4">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+
+            <!-- Botão Collapse Desktop -->
+            <button onclick="toggleSidebarDesktop()" class="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-ugc-card border border-ugc-border rounded-full items-center justify-center text-ugc-muted hover:text-white hover:border-ugc-pink transition-colors z-50">
+                <i id="sidebar-toggle-icon" data-lucide="chevron-left" class="w-3 h-3 transition-transform duration-300"></i>
+            </button>
+        </div>
+
+        <nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto overflow-x-hidden">
+            <p class="section-label px-3 text-[10px] font-bold text-ugc-muted uppercase tracking-wider mb-2 mt-2 truncate">Principal</p>
+            <a href="creatorflow.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Dashboard</span>
+            </a>
+            <a href="planner.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Planner">
+                <i data-lucide="calendar" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Planner</span>
+            </a>
+            <a href="tasks.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Tasks">
+                <i data-lucide="briefcase" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Tasks</span>
+            </a>
+
+            <p class="section-label px-3 text-[10px] font-bold text-ugc-muted uppercase tracking-wider mb-2 mt-6 truncate">Criação</p>
+            <a href="scripts.html" class="nav-item active w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Roteiros IA">
+                <i data-lucide="file-text" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Roteiros</span>
+            </a>
+            <p class="section-label px-3 text-[10px] font-bold text-ugc-muted uppercase tracking-wider mb-2 mt-6 truncate">Gestão</p>
+            <a href="contracts.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Contratos">
+                <i data-lucide="file-signature" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Contratos</span>
+            </a>
+            <a href="finance.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Financeiro">
+                <i data-lucide="dollar-sign" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Financeiro</span>
+            </a>
+            <a href="pricing_simulator.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Simulador de Preço">
+                <i data-lucide="calculator" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Simulador de Preço</span>
+            </a>
+        </nav>
+        
+        <div class="p-4 border-t border-ugc-border">
+            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-ugc-hover cursor-pointer transition-colors" title="Perfil">
+                <img id="profile-avatar" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Perfil" class="w-9 h-9 rounded-full border border-ugc-border shrink-0">
+                <div class="flex-1 min-w-0 user-info transition-opacity duration-300">
+                    <p id="profile-name" class="text-sm font-medium text-white truncate">Carregando...</p>
+                    <p id="profile-email" class="text-xs text-ugc-muted truncate">...</p>
+                </div>
+                <button onclick="logout()" title="Sair" class="ml-auto p-1.5 rounded hover:bg-ugc-hover text-ugc-muted hover:text-white transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 bg-ugc-bg overflow-y-auto relative transition-all duration-300">
+        <!-- Mobile Header -->
+        <header class="md:hidden h-16 bg-ugc-card border-b border-ugc-border flex items-center justify-between px-4 sticky top-0 z-20">
+            <div class="flex items-center gap-2">
+                <i data-lucide="sparkles" class="text-ugc-pink w-5 h-5"></i>
+                <span class="font-bold text-white">Creatorflow</span>
+            </div>
+            <button onclick="toggleMobileMenu()" class="text-ugc-muted hover:text-white p-2 rounded-lg active:bg-ugc-hover"><i data-lucide="menu" class="w-6 h-6"></i></button>
+        </header>
+
+        <div class="p-6 md:p-10 max-w-7xl mx-auto w-full min-h-screen flex flex-col">
+            
+            <header class="mb-8">
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-display font-bold text-white mb-2 flex items-center gap-3">
+                            Roteiros de Conteúdo
+                        </h1>
+                        <p class="text-ugc-muted text-sm md:text-base">Crie com IA, escreva manualmente e organize suas ideias.</p>
+                    </div>
+                    
+                    <!-- Tabs (Mobile Optimized) -->
+                    <div class="bg-ugc-card p-1 rounded-xl border border-ugc-border overflow-x-auto hide-scrollbar">
+                        <div class="flex min-w-max">
+                            <button onclick="switchTab('generator')" id="btn-tab-generator" class="tab-btn active px-4 py-2 rounded-lg text-xs font-semibold text-ugc-muted hover:text-white flex items-center gap-2 transition-all border border-transparent whitespace-nowrap">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i> Gerador IA
+                            </button>
+                            <button onclick="switchTab('manual')" id="btn-tab-manual" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-ugc-muted hover:text-white flex items-center gap-2 transition-all border border-transparent whitespace-nowrap">
+                                <i data-lucide="pen-tool" class="w-4 h-4"></i> Criar Manual
+                            </button>
+                            <button onclick="switchTab('library')" id="btn-tab-library" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-ugc-muted hover:text-white flex items-center gap-2 transition-all border border-transparent whitespace-nowrap">
+                                <i data-lucide="library" class="w-4 h-4"></i> Biblioteca
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- TAB 1: GERADOR IA -->
+            <div id="tab-generator" class="flex flex-col lg:flex-row gap-8 h-full animate-fade-in">
+                <!-- Input Section -->
+                <div class="w-full lg:w-1/3 space-y-6">
+                    <div class="bg-ugc-card border border-ugc-border rounded-xl p-6 shadow-lg">
+                        <form id="script-form" onsubmit="generateScript(event)" class="space-y-5">
+                            <div>
+                                <label class="block text-xs font-medium text-ugc-muted mb-2">Nome do Produto / Marca</label>
+                                <input type="text" id="product-name" required placeholder="Ex: Sérum Vitamina C" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ugc-pink focus:ring-1 focus:ring-ugc-pink transition-all placeholder-ugc-muted/50">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-ugc-muted mb-2">Formato</label>
+                                    <select id="platform" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ugc-pink transition-all appearance-none">
+                                        <option value="Reels/TikTok">Reels / TikTok</option>
+                                        <option value="Stories">Stories</option>
+                                        <option value="Ad Pago">Anúncio Pago</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-ugc-muted mb-2">Tom de Voz</label>
+                                    <select id="tone" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ugc-pink transition-all appearance-none">
+                                        <option value="enthusiastic">Entusiasmado</option>
+                                        <option value="educational">Educativo</option>
+                                        <option value="asmr">ASMR / Estético</option>
+                                        <option value="problem">Problema/Solução</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-ugc-muted mb-2">Pontos Chave (Opcional)</label>
+                                <textarea id="key-points" rows="3" placeholder="Ex: Textura leve, não oleoso, brilha na pele..." class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ugc-pink transition-all placeholder-ugc-muted/50 resize-none"></textarea>
+                            </div>
+
+                            <button type="submit" id="generate-btn" class="w-full gradient-btn text-white font-bold py-3.5 rounded-lg shadow-lg shadow-ugc-pink/20 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-transform">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                Gerar Roteiro Mágico
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Output Section -->
+                <div class="w-full lg:w-2/3">
+                    <div id="empty-state" class="h-full min-h-[300px] md:min-h-[400px] bg-ugc-card border border-ugc-border border-dashed rounded-xl flex flex-col items-center justify-center text-center p-8">
+                        <div class="w-20 h-20 bg-ugc-bg rounded-full flex items-center justify-center mb-4">
+                            <i data-lucide="bot" class="text-ugc-muted w-10 h-10"></i>
+                        </div>
+                        <h3 class="text-white font-medium text-lg mb-2">Aguardando comando...</h3>
+                        <p class="text-ugc-muted max-w-sm">Preencha os dados ao lado para ver a mágica acontecer.</p>
+                    </div>
+
+                    <div id="loading-state" class="hidden h-full min-h-[300px] md:min-h-[400px] bg-ugc-card border border-ugc-border rounded-xl p-8 flex flex-col items-center justify-center">
+                        <div class="relative w-16 h-16 mb-6">
+                            <div class="absolute inset-0 border-4 border-ugc-pink/20 rounded-full"></div>
+                            <div class="absolute inset-0 border-4 border-ugc-pink rounded-full border-t-transparent animate-spin"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i data-lucide="sparkles" class="w-6 h-6 text-ugc-pink animate-pulse"></i>
+                            </div>
+                        </div>
+                        <p class="text-white font-medium animate-pulse">Criando viral...</p>
+                    </div>
+
+                    <div id="result-state" class="hidden h-full bg-ugc-card border border-ugc-border rounded-xl p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-ugc-pink/5 rounded-full blur-3xl -mr-20 -mt-20"></div>
+
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 relative z-10 gap-4">
+                            <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                                <i data-lucide="file-check" class="text-green-400 w-5 h-5"></i>
+                                Roteiro Gerado
+                            </h3>
+                            <div class="flex gap-2 w-full sm:w-auto">
+                                <button onclick="saveGeneratedScript()" class="flex-1 sm:flex-none justify-center text-white bg-ugc-pink hover:bg-pink-600 px-3 py-2 rounded-lg transition-colors font-bold text-xs shadow-lg shadow-ugc-pink/20 flex items-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i> Salvar
+                                </button>
+                                <button onclick="copyScript('generated')" class="text-ugc-muted hover:text-white bg-ugc-bg border border-ugc-border hover:border-ugc-pink p-2 rounded-lg transition-colors" title="Copiar">
+                                    <i data-lucide="copy" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="resetGenerator()" class="text-ugc-muted hover:text-white bg-ugc-bg border border-ugc-border hover:border-ugc-pink p-2 rounded-lg transition-colors" title="Novo">
+                                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="generated-content" class="space-y-6 relative z-10 overflow-y-auto pr-2 custom-scrollbar">
+                            <div class="bg-ugc-bg/50 rounded-lg p-4 border border-ugc-border/50">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="bg-purple-500/20 text-purple-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase">00-03s • Gancho</span>
+                                </div>
+                                <p id="script-hook" class="text-white text-lg font-medium leading-relaxed"></p>
+                            </div>
+                            <div class="bg-ugc-bg/50 rounded-lg p-4 border border-ugc-border/50">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="bg-blue-500/20 text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase">03-15s • Corpo</span>
+                                </div>
+                                <p id="script-body" class="text-ugc-text leading-relaxed whitespace-pre-line"></p>
+                            </div>
+                            <div class="bg-ugc-bg/50 rounded-lg p-4 border border-ugc-border/50">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="bg-green-500/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase">15-60s • CTA</span>
+                                </div>
+                                <p id="script-cta" class="text-white font-bold text-lg"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: EDITOR MANUAL -->
+            <div id="tab-manual" class="hidden h-full max-w-4xl mx-auto w-full animate-fade-in">
+                <div class="bg-ugc-card border border-ugc-border rounded-xl p-6 md:p-8 shadow-lg">
+                    <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                        <i data-lucide="pen-tool" class="text-ugc-pink w-5 h-5"></i>
+                        Escrever Roteiro
+                    </h3>
+                    <form id="manual-form" onsubmit="saveManualScript(event)" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-medium text-ugc-muted mb-2">Título / Produto</label>
+                                <input type="text" id="manual-title" required placeholder="Ex: Unboxing Recebidos" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ugc-pink transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-ugc-muted mb-2">Plataforma</label>
+                                <select id="manual-platform" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ugc-pink transition-all appearance-none">
+                                    <option value="Reels/TikTok">Reels / TikTok</option>
+                                    <option value="Stories">Stories</option>
+                                    <option value="YouTube">YouTube Shorts</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-ugc-muted mb-2">Conteúdo do Roteiro</label>
+                            <textarea id="manual-content" required rows="12" placeholder="Escreva seu roteiro aqui..." class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ugc-pink transition-all placeholder-ugc-muted/50 resize-y font-mono text-sm leading-relaxed"></textarea>
+                        </div>
+
+                        <div class="flex justify-end pt-4">
+                            <button type="submit" class="w-full md:w-auto gradient-btn text-white font-bold py-3 px-8 rounded-lg shadow-lg shadow-ugc-pink/20 flex items-center justify-center gap-2">
+                                <i data-lucide="save" class="w-4 h-4"></i>
+                                Salvar na Biblioteca
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB 3: BIBLIOTECA -->
+            <div id="tab-library" class="hidden h-full w-full animate-fade-in">
+                <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Cards injetados via JS -->
+                    <div class="col-span-full text-center py-20 text-ugc-muted">
+                        <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-4"></i>
+                        Carregando seus roteiros...
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAP4fQ3TZ09XWggKNKZJDMJQ8TnRdNYwzc",
+          authDomain: "ugcp-9ec19.firebaseapp.com",
+          projectId: "ugcp-9ec19",
+          storageBucket: "ugcp-9ec19.firebasestorage.app",
+          messagingSenderId: "921864203168",
+          appId: "1:921864203168:web:55fb378c2a904737d512c5",
+          measurementId: "G-51WXW579CN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'creatorflow-app';
+        let userId = null;
+        let isSidebarCollapsed = false;
+
+        // Auth
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.isAnonymous) {
+                window.location.href = './index.html';
+                return;
+            }
+            userId = user.uid;
+            
+            // Perfil
+            const name = user.displayName || user.email.split('@')[0];
+            document.getElementById('profile-name').innerText = name;
+            document.getElementById('profile-email').innerText = user.email;
+            if(user.photoURL) document.getElementById('profile-avatar').src = user.photoURL;
+
+            // Inicia Listener da Biblioteca
+            setupLibraryListener();
+        });
+
+        // --- TABS LOGIC ---
+        window.switchTab = (tabName) => {
+            // Hide all
+            ['generator', 'manual', 'library'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`btn-tab-${t}`).classList.remove('active');
+            });
+            // Show selected
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`btn-tab-${tabName}`).classList.add('active');
+        };
+
+        // --- GENERATOR LOGIC ---
+        window.generateScript = async (e) => {
+            e.preventDefault();
+            const product = document.getElementById('product-name').value;
+            const platform = document.getElementById('platform').value;
+            const tone = document.getElementById('tone').value;
+            const keyPoints = document.getElementById('key-points').value;
+            
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('result-state').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
+            
+            try {
+                // Chamar a IA
+                const result = await generateScriptWithAI(product, platform, tone, keyPoints);
+                
+                if (!result.success) {
+                    showToast('Erro ao gerar: ' + result.error);
+                    document.getElementById('loading-state').classList.add('hidden');
+                    document.getElementById('empty-state').classList.remove('hidden');
+                    return;
+                }
+
+                // Exibir resultado
+                document.getElementById('script-hook').innerText = result.hook || 'Hook não gerado';
+                document.getElementById('script-body').innerText = result.body || 'Corpo não gerado';
+                document.getElementById('script-cta').innerText = result.cta || 'CTA não gerado';
+                
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('result-state').classList.remove('hidden');
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Erro ao gerar:', error);
+                showToast('Erro ao gerar roteiro. Tente novamente.');
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('empty-state').classList.remove('hidden');
+            }
+        }
+
+        // --- GOOGLE GEMINI AI INTEGRATION (com fallback para Ollama local) ---
+        async function generateScriptWithAI(product, platform, tone, keyPoints) {
+            try {
+                const prompt = `Você é um expert em criar roteiros para conteúdo viral em redes sociais, especialmente UGC (User Generated Content).
+
+TAREFA: Criar um roteiro para ${platform} sobre o produto "${product}" com tom ${tone}.
+${keyPoints ? `PONTOS-CHAVE: ${keyPoints}` : ''}
+
+Crie um roteiro estruturado em EXATAMENTE este formato:
+
+[HOOK]
+(Uma frase IMPACTANTE para os primeiros 3 segundos que faz a pessoa parar de scrollar)
+
+[CORPO]  
+(2-3 linhas mostrando o produto em ação, seus benefícios, por que é bom)
+
+[CTA]
+(Uma chamada para ação clara e convincente)
+
+Importante:
+- Use linguagem natural, como se estivesse falando para amigos
+- Inclua emojis estrategicamente
+- Seja criativo mas autêntico
+- Lembre que é UGC, então o tom deve ser de pessoa comum, não apresentador profissional`;
+
+                // Tentar com HuggingFace (gratuito)
+                const response = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        inputs: prompt,
+                        parameters: {
+                            max_length: 500,
+                            temperature: 0.9,
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    // Fallback para templates locais se API falhar
+                    return generateLocalScript(product, tone);
+                }
+
+                const data = await response.json();
+                
+                // Extrair texto gerado
+                let text = '';
+                if (Array.isArray(data)) {
+                    text = data[0]?.generated_text || '';
+                } else if (data[0]?.generated_text) {
+                    text = data[0].generated_text;
+                } else {
+                    return generateLocalScript(product, tone);
+                }
+                
+                // Parse do response
+                const hookMatch = text.match(/\[HOOK\]([\s\S]*?)(?=\[CORPO\])/i);
+                const bodyMatch = text.match(/\[CORPO\]([\s\S]*?)(?=\[CTA\])/i);
+                const ctaMatch = text.match(/\[CTA\]([\s\S]*?)$/i);
+
+                const hook = (hookMatch?.[1] || '').trim();
+                const body = (bodyMatch?.[1] || '').trim();
+                const cta = (ctaMatch?.[1] || '').trim();
+
+                // Se não conseguir fazer parse, usar fallback
+                if (!hook || !body || !cta) {
+                    return generateLocalScript(product, tone);
+                }
+
+                return { hook, body, cta, success: true };
+            } catch (error) {
+                console.error('AI Error:', error);
+                // Fallback para templates locais
+                return generateLocalScript(product, tone);
+            }
+        }
+
+        // Fallback: Gerar roteiro com templates locais inteligentes (versão EXPANDIDA)
+        function generateLocalScript(product, tone) {
+            const templates = {
+                problem: {
+                    hooks: [
+                        `Pare de jogar dinheiro fora com ${product}! 🛑 Descobri a solução que NINGUÉM tá falando`,
+                        `Testei TUDO... 47 diferentes... mas só isso resolveu! 😱 E não é nada caro!`,
+                        `Você tá cometendo esse erro AGORA com ${product}? 🚨 A maioria está...`
+                    ],
+                    bodies: [
+                        `Eu testei literalmente dezenas de opções diferentes, gastei MUITO dinheiro, e aquilo que funcionou foi o ${product}.\n\nOlha essa qualidade, como age tão rápido, o resultado é ABSURDO. Minha mãe testou, meu marido testou, até minha irmã pediu pra comprar.\n\nSe você tá cansado de gastar com produtos que não funcionam, essa é a opção. A textura é perfeita, o resultado é real, não é só marketing bonito. Sério, meu vida mudou com isso.`,
+                        `Eu gastava tanto dinheiro MAL, comprando qualquer coisa, mas quando descobri o ${product} mudou TUDO na minha vida.\n\nA qualidade é MUITO superior, dura o dobro, o preço é METADE do que pagava antes. Não é coincidência, é estratégia mesmo. Usei por 3 meses seguidos e finalmente encontrei meu produto.\n\nToda vez que preciso recompro. Meus amigos ficam pedindo pra eu trazer pra eles. Vale cada centavo.`,
+                        `Achava que era super caro, que só tinha em importado caro, mas descobri que o ${product} vale MUITO a pena.\n\nÉ literalmente o melhor custo-benefício que encontrei em TODA a internet. Qualidade premium, preço acessível, resultado rápido. Não entendo como não é mais famoso, sério.\n\nUsei a minha dose e já tô comprando novamente. Recomendo demais, com certeza meu produto do ano.`
+                    ],
+                    ctas: [
+                        `Não perde tempo, clica no link aqui! 👇 Estão dando super desconto agora!`,
+                        `Corre antes de sair do estoque! 🔥 Link está na descrição, não deixa passar!`,
+                        `Link na descrição! Confiem em mim! 💯 Vocês vão amar tanto quanto eu!`
+                    ]
+                },
+                asmr: {
+                    hooks: [
+                        `(Sons satisfatórios de unboxing) ✨ Olha que embalagem impecável do ${product}...`,
+                        `Olha que experiência sensorial é essa... 🤤 ${product} acabou de chegar e já tô viciada`,
+                        `Isso é realmente ${product}? Que embalagem linda! 😍 Deixa eu mostrar pra vocês...`
+                    ],
+                    bodies: [
+                        `A experiência sensorial do ${product} é outro nível mesmo.\n\nOlha só como o produto sai da embalagem... suave, luxuoso, premium. Sinta a qualidade em cada detalhe, como minha pele responde imediatamente. Meu momento favorito do dia é quando vou usar esse produto.\n\nDesde o unboxing já dá pra ver que é qualidade diferente, embalagem premium, aquele cheiro de produto caro. O toque na pele é delicado, suave, praticamente um ritual de autocuidado mesmo.`,
+                        `A textura é TÃO satisfatória que virou meu momento zen do dia.\n\nCada vez que uso é como uma experiência completa de spa em casa. O ${product} se espalha tão suavemente, deixa minha pele tão macia e hidratada. A absorção é rápida, não deixa pegajoso, fica esse acabamento lindo.\n\nMeu ritual noturno agora é relaxante demais. Ligo uma música, acendo vela, e foco nesse momentinho comigo mesma. Virou imprescindível.`,
+                        `Quando abro a embalagem do ${product}, já consigo sentir a qualidade!\n\nA cor, o aroma, a consistência... tudo perfeito. Você consegue notar que é produto caro mesmo antes de colocar na pele. Quando finalmente aplico, é aquela suavidade, aquele conforto imediato.\n\nA minha rotina de beleza virou luxo porque usei ${product}. Aquele tipo de produto que vale toda economia que eu fiz pra poder comprar sempre.`
+                    ],
+                    ctas: [
+                        `Disponível agora! Link na descrição para você também experimentar essa sensação! ✨`,
+                        `Transforma seu ritual diário em experiência premium! Clica aqui e já pede! 💆`,
+                        `Merece um lugar especial no seu banheiro! Deixa o link pra vocês! 👇`
+                    ]
+                },
+                educational: {
+                    hooks: [
+                        `Você sabia que usa ${product} ERRADO? 🧐 99% das pessoas erram SEMPRE!`,
+                        `Ninguém usa isso da forma certa... deixa eu ensinar o segredo! 📚 Minha vida mudou`,
+                        `3 PASSOS para TRANSFORMAR completamente seu ${product}! 🔄 Presta atenção!`
+                    ],
+                    bodies: [
+                        `Vou te ensinar a forma CORRETA de usar o ${product}. A maioria está cometendo erro GRAVE.\n\nPASSO 1: Use pouco mesmo! A quantidade é METADE do que você imagina. Menos é mais nesse caso.\n\nPASSO 2: Espalhe muito suavemente, massageando a pele. Pressão leve, movimentos circulares. Deixe agir uns 2 minutos.\n\nPASSO 3: Complete o ritmo. Veja como o resultado muda COMPLETAMENTE. Minha pele ficou 10x melhor quando comecei a fazer assim.\n\nDeixa eu mostrar aqui o before e after quando comecei fazer certinho...`,
+                        `A MAIORIA usa demais e estraga o resultado completamente!\n\nCom essas 2 técnicas você aproveita 100% do ${product}:\n\nTécnica 1 - Ative a fórmula: Misture com um pouquinho de água destilada. Fica mais potente!\n\nTécnica 2 - Tempo de espera: Deixe 3-5 minutos repousando. A absorção é muito melhor.\n\nHá 1 ano ninguém me ensinava isso. Agora sempre uso desse jeito e o resultado é 10x melhor. Minha pele mudou de jeito impressionante!\n\nSe você está usando errado como era, testa essas técnicas HOJE.`,
+                        `Descobri 4 maneiras DIFERENTES de usar o ${product} e cada uma tem um resultado!\n\nManeira 1 - Rápida (2min): Pra quando está com pressa, espalha rápido.\nManeira 2 - Profunda (10min): Massagem lenta, deixa agir. MELHOR resultado!\nManeira 3 - Reforçada: Aplica, espera 5min, aplica de novo. Intenso demais!\nManeira 4 - Combo: Mistura com outra coisa complementar. Resultado revolucionário!\n\nTestei todas as 4 no meu círculo. A maneira 2 ganhou, mas cada pessoa é diferente. Descobre qual é sua também!`
+                    ],
+                    ctas: [
+                        `Salve esse vídeo para NUNCA esquecer! 📌 Compartilha com quem precisa!`,
+                        `Testa agora e me conta no comentário qual técnica funcionou MELHOR! 👇 Quero saber!`,
+                        `Compartilha com quem usa ${product}! Eles vão ficar grato demais! 🙌 Manda aí!`
+                    ]
+                },
+                enthusiastic: {
+                    hooks: [
+                        `GENTE! Vocês PRECISAM ver isso AGORA! 😱 Chegou o ${product} e tô maravilhada!`,
+                        `Não consigo parar de usar ${product}! 🤩 Virou meu obsessão, é SÉRIO!`,
+                        `Melhor compra que já fiz na VIDA! 🎉 E não é nem caro! Como ninguém fala disso?`
+                    ],
+                    bodies: [
+                        `Tô COMPLETAMENTE chocada com a qualidade absurda do ${product}!\n\nEle promete muito e entrega TUDO e mais um pouco. Olha esse acabamento, sério, apaixonei perdidamente. Usei uma vez e já tô rechamando.\n\nMeu círculo inteiro quer saber onde comprei. Mandei o link pra todo mundo. As minhas amigas estão DOIDINHAS pra testar também.\n\nQualidade de marca famosa, preço que qualquer um consegue pagar. É a combinação perfeita mesmo!`,
+                        `Não esperava NADA tão bom pelo preço mesmo! Achava que era cilada!\n\nQualidade que parece importada caro, preço que cabe no bolso. Melhor deal ever! 🔥 Já recomprei 3 vezes!\n\nMeu namorado falou "nossa, isso sim é qualidade!". Minha mãe disse "por que não mostrou antes?". Minha avó pediu pra comprar mais.\n\nSério, esse ${product} virou coisa de família. Todo mundo querendo usar, ninguém quer largar da mão.`,
+                        `Já recomendei pro meu círculo inteiro! TODOS querem!\n\nTodos querem saber aonde comprei, como consegui, qual é o segredo. Mostrei, deixei testar, e UNO, virou vício.\n\nÉ tipo aquele produto que você acha tão bom que quer compartilhar com TODOS. É viral demais! Todo dia chega mensagem de alguém pedindo o link.\n\nGarantia que você vai ficar tão apaixonado quanto eu. Prometo que vale cada centavo!`
+                    ],
+                    ctas: [
+                        `Corre antes que acabe o estoque! 🔥 Link aqui! 👇 Não deixa passar essa oportunidade!`,
+                        `Vem comigo testar! Deixo link na bio e na descrição! 💖 Quero saber o seu feedback!`,
+                        `Vocês vão amar TANTO quanto eu! Garanto demais! ✨ Clica no link já! Não vai se arrepender!`
+                    ]
+                }
+            };
+
+            const toneTemplates = templates[tone] || templates.enthusiastic;
+            const hook = toneTemplates.hooks[Math.floor(Math.random() * toneTemplates.hooks.length)];
+            const body = toneTemplates.bodies[Math.floor(Math.random() * toneTemplates.bodies.length)];
+            const cta = toneTemplates.ctas[Math.floor(Math.random() * toneTemplates.ctas.length)];
+
+            return { hook, body, cta, success: true };
+        }
+
+        window.resetGenerator = () => {
+            document.getElementById('script-form').reset();
+            document.getElementById('result-state').classList.add('hidden');
+            document.getElementById('empty-state').classList.remove('hidden');
+        }
+
+        // --- SAVE & LIBRARY LOGIC ---
+        
+        // 1. Salvar Roteiro da IA
+        window.saveGeneratedScript = async () => {
+            if (!userId) return;
+            const title = document.getElementById('product-name').value || "Roteiro IA";
+            const platform = document.getElementById('platform').value;
+            const hook = document.getElementById('script-hook').innerText;
+            const body = document.getElementById('script-body').innerText;
+            const cta = document.getElementById('script-cta').innerText;
+            
+            const content = `[HOOK]\n${hook}\n\n[CORPO]\n${body}\n\n[CTA]\n${cta}`;
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'scripts'), {
+                    title, platform, content, type: 'IA', createdAt: new Date()
+                });
+                showToast('Roteiro salvo na biblioteca!');
+                // Opcional: ir para biblioteca
+                // switchTab('library');
+            } catch (e) {
+                console.error(e); showToast('Erro ao salvar.');
+            }
+        }
+
+        // 2. Salvar Roteiro Manual
+        window.saveManualScript = async (e) => {
+            e.preventDefault();
+            if (!userId) return;
+            
+            const title = document.getElementById('manual-title').value;
+            const platform = document.getElementById('manual-platform').value;
+            const content = document.getElementById('manual-content').value;
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'scripts'), {
+                    title, platform, content, type: 'Manual', createdAt: new Date()
+                });
+                showToast('Roteiro manual salvo!');
+                document.getElementById('manual-form').reset();
+                switchTab('library');
+            } catch (e) {
+                console.error(e); showToast('Erro ao salvar.');
+            }
+        }
+
+        // 3. Listener Realtime (Biblioteca)
+        function setupLibraryListener() {
+            const q = query(collection(db, 'artifacts', appId, 'users', userId, 'scripts'), orderBy('createdAt', 'desc'));
+            
+            onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('library-grid');
+                
+                if (snapshot.empty) {
+                    list.innerHTML = `
+                        <div class="col-span-full flex flex-col items-center justify-center py-20 text-ugc-muted border border-ugc-border border-dashed rounded-xl">
+                            <i data-lucide="ghost" class="w-10 h-10 mb-2 opacity-50"></i>
+                            <p>Sua biblioteca está vazia.</p>
+                            <button onclick="switchTab('manual')" class="mt-4 text-ugc-pink hover:underline text-xs">Criar primeiro roteiro</button>
+                        </div>`;
+                    lucide.createIcons();
+                    return;
+                }
+
+                list.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const date = data.createdAt?.toDate().toLocaleDateString('pt-BR') || '--/--';
+                    const typeColor = data.type === 'IA' ? 'text-purple-400 border-purple-500/30 bg-purple-500/10' : 'text-blue-400 border-blue-500/30 bg-blue-500/10';
+                    
+                    const card = document.createElement('div');
+                    card.className = 'bg-ugc-card border border-ugc-border rounded-xl p-5 hover:border-ugc-pink/30 transition-all group flex flex-col';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${typeColor}">${data.type || 'Manual'}</span>
+                            <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick="copyLibraryItem('${doc.id}')" class="p-1.5 hover:bg-ugc-bg rounded text-ugc-muted hover:text-white" title="Copiar"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="deleteLibraryItem('${doc.id}')" class="p-1.5 hover:bg-ugc-bg rounded text-ugc-muted hover:text-red-500" title="Excluir"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                            </div>
+                        </div>
+                        <h4 class="font-bold text-white mb-1 line-clamp-1">${data.title}</h4>
+                        <p class="text-xs text-ugc-muted mb-4">${data.platform} • ${date}</p>
+                        
+                        <div class="flex-1 bg-ugc-bg/50 rounded-lg p-3 border border-ugc-border/50 text-xs text-ugc-muted font-mono leading-relaxed overflow-hidden h-32 relative">
+                            ${data.content.replace(/\n/g, '<br>')}
+                            <div class="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-ugc-card/50 to-transparent"></div>
+                        </div>
+                        <!-- Campo oculto para cópia fácil -->
+                        <textarea id="copy-${doc.id}" class="hidden">${data.content}</textarea>
+                    `;
+                    list.appendChild(card);
+                });
+                lucide.createIcons();
+            });
+        }
+
+        // --- ACTIONS ---
+        window.deleteLibraryItem = async (id) => {
+            if(confirm('Excluir este roteiro permanentemente?')) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'scripts', id));
+                    showToast('Roteiro excluído.');
+                } catch(e) { console.error(e); }
+            }
+        }
+
+        window.copyLibraryItem = (id) => {
+            const text = document.getElementById(`copy-${id}`).value;
+            navigator.clipboard.writeText(text);
+            showToast('Copiado!');
+        }
+
+        window.copyScript = (source) => {
+            if (source === 'generated') {
+                const hook = document.getElementById('script-hook').innerText;
+                const body = document.getElementById('script-body').innerText;
+                const cta = document.getElementById('script-cta').innerText;
+                navigator.clipboard.writeText(`${hook}\n\n${body}\n\n${cta}`);
+                showToast('Roteiro copiado!');
+            }
+        }
+
+        // Helpers
+        window.toggleSidebarDesktop = () => {
+            const s=document.getElementById('sidebar'), i=document.getElementById('sidebar-toggle-icon'); isSidebarCollapsed=!isSidebarCollapsed; 
+            if(isSidebarCollapsed){s.classList.add('w-20','sidebar-collapsed');s.classList.remove('w-64');i.style.transform='rotate(180deg)'}
+            else{s.classList.remove('w-20','sidebar-collapsed');s.classList.add('w-64');i.style.transform='rotate(0deg)'}
+        }
+        
+        // Garante que a função esteja no escopo global para o onclick do HTML
+        window.toggleMobileMenu = () => { 
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            sidebar.classList.toggle('open');
+            // Toggle do overlay baseado na classe da sidebar ou manualmente
+            if (sidebar.classList.contains('open')) {
+                overlay.classList.remove('hidden');
+            } else {
+                overlay.classList.add('hidden');
+            }
+        }
+        
+        // Auto-close menu on link click (mobile)
+        document.querySelectorAll('.nav-item').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 768) { // md breakpoint
+                    toggleMobileMenu();
+                }
+            });
+        });
+
+        window.showToast = (m) => { const c=document.getElementById('toast-container'), t=document.createElement('div'); t.className='toast bg-ugc-card border border-ugc-pink/30 text-white px-4 py-3 rounded-lg shadow-xl flex gap-3 min-w-[300px] pointer-events-auto items-center'; t.innerHTML=`<div class="bg-ugc-pink/20 p-1.5 rounded-full text-ugc-pink"><i data-lucide="check" class="w-4 h-4"></i></div><span class="text-sm font-medium">${m}</span>`; c.appendChild(t); lucide.createIcons(); setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(20px)';setTimeout(()=>t.remove(),300)},3000); }
+        window.logout = async () => { try { await signOut(auth); window.location.href = './index.html'; } catch(e){console.error(e);} }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

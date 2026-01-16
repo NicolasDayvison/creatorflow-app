@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creatorflow - Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            // Removido darkMode: 'class' pois será sempre escuro
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        ugc: {
+                            // Cores fixas no modo escuro
+                            bg: '#141414',
+                            sidebar: '#0F0F0F',
+                            card: '#1E1E1E',
+                            pink: '#E65696',
+                            purple: '#9D66E3',
+                            text: '#EAEAEA',
+                            muted: '#A0A0A0',
+                            border: '#2A2A2A',
+                            hover: '#252525'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Ajuste do scrollbar para combinar com o tema escuro */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #141414; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+        body { background-color: #141414; color: #EAEAEA; }
+        
+        .text-gradient {
+            background: linear-gradient(90deg, #E65696 0%, #9D66E3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(230, 86, 150, 0.15) 0%, rgba(157, 102, 227, 0.05) 100%);
+            border-left: 3px solid #E65696;
+            color: #E65696;
+        }
+
+        /* Animações */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .sidebar-mobile { transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+        .sidebar-mobile.open { transform: translateX(0); }
+    </style>
+</head>
+<body class="bg-ugc-bg text-ugc-text flex h-screen overflow-hidden text-sm relative">
+
+    <!-- Overlay Mobile -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden backdrop-blur-sm" onclick="toggleMobileMenu()"></div>
+
+    <!-- Login Overlay (Proteção para Preview) -->
+    <div id="login-overlay" class="fixed inset-0 bg-ugc-bg z-[60] hidden flex flex-col items-center justify-center p-4 animate-fade-in">
+        <div class="w-16 h-16 bg-ugc-pink/10 rounded-2xl flex items-center justify-center mb-6">
+            <i data-lucide="lock" class="w-8 h-8 text-ugc-pink"></i>
+        </div>
+        <h2 class="text-2xl font-bold mb-2 text-white">Acesso Restrito</h2>
+        <p class="text-ugc-muted mb-8 text-center max-w-xs">Você precisa estar logado para acessar o dashboard.</p>
+        <a href="index.html" class="bg-ugc-pink hover:bg-pink-600 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-ugc-pink/20 hover:scale-105 active:scale-95">
+            Ir para Login
+        </a>
+    </div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-ugc-sidebar border-r border-ugc-border flex flex-col sidebar-mobile md:translate-x-0 md:static transition-all duration-300">
+        <!-- Logo -->
+        <div class="h-20 flex items-center justify-between px-6 border-b border-ugc-border/50">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-ugc-pink to-ugc-purple flex items-center justify-center shadow-lg shadow-ugc-pink/20">
+                    <i data-lucide="sparkles" class="text-white w-4 h-4"></i>
+                </div>
+                <span class="font-display font-bold text-lg tracking-wide text-white">Creatorflow</span>
+            </div>
+            <button onclick="toggleMobileMenu()" class="md:hidden text-ugc-muted"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+
+        <!-- Navegação -->
+        <nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+            <p class="px-3 text-[10px] font-bold text-ugc-muted uppercase tracking-wider mb-2 mt-2">Principal</p>
+            
+            <a href="creatorflow.html" class="nav-item active w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-text hover:bg-ugc-hover transition-colors">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            
+            <a href="planner.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors">
+                <i data-lucide="calendar" class="w-5 h-5 mr-3"></i>
+                <span class="font-medium">Planner</span>
+            </a>
+
+            <a href="tasks.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors">
+                <i data-lucide="briefcase" class="w-5 h-5 mr-3"></i>
+                <span class="font-medium">Tasks</span>
+            </a>
+
+            <p class="px-3 text-[10px] font-bold text-ugc-muted uppercase tracking-wider mb-2 mt-6">Criação</p>
+
+            <a href="scripts.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors">
+                <i data-lucide="file-text" class="w-5 h-5 mr-3"></i>
+                <span class="font-medium">Roteiros IA</span>
+            </a>
+            <a href="contracts.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Contratos">
+                <i data-lucide="file-signature" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Contratos</span>
+            </a>
+            <a href="finance.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Financeiro">
+                <i data-lucide="dollar-sign" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Financeiro</span>
+            </a>
+            <a href="pricing_simulator.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors group relative" title="Simulador de Preço">
+                <i data-lucide="calculator" class="w-5 h-5 mr-3 group-hover:text-ugc-pink transition-colors shrink-0"></i>
+                <span class="font-medium sidebar-text whitespace-nowrap overflow-hidden transition-all">Simulador de Preço</span>
+            </a>
+
+        </nav>
+
+        <!-- Perfil Usuário -->
+        <div class="p-4 border-t border-ugc-border">
+            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-ugc-hover cursor-pointer transition-colors" id="user-profile">
+                <img id="user-avatar" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Perfil" class="w-9 h-9 rounded-full border border-ugc-border object-cover">
+                <div class="flex-1 min-w-0">
+                    <p id="user-name" class="text-sm font-medium truncate text-white">Carregando...</p>
+                    <p id="user-email" class="text-xs text-ugc-muted truncate">...</p>
+                </div>
+                <button onclick="logout()" class="text-ugc-muted hover:text-white" title="Sair">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 flex flex-col min-w-0 bg-ugc-bg overflow-y-auto relative transition-all duration-300">
+        
+        <!-- Header Mobile -->
+        <div class="md:hidden h-16 bg-ugc-card border-b border-ugc-border flex items-center justify-between px-4 sticky top-0 z-20">
+            <div class="flex items-center gap-2">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 text-ugc-pink"></i>
+                <span class="font-bold text-white">Dashboard</span>
+            </div>
+            <button onclick="toggleMobileMenu()" class="p-2 text-ugc-muted hover:text-white"><i data-lucide="menu" class="w-6 h-6"></i></button>
+        </div>
+
+        <div class="p-6 md:p-10 max-w-7xl mx-auto w-full min-h-screen">
+            
+            <!-- Saudação -->
+            <header class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 animate-fade-in">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-display font-bold mb-2 text-white">
+                        Olá, <span id="header-name" class="text-gradient">Criadora!</span> ✨
+                    </h1>
+                    <p id="header-subtitle" class="text-ugc-muted">Aqui está o resumo das suas produções hoje.</p>
+                </div>
+                <div class="flex gap-3">
+                    <!-- Botão de Tema Removido -->
+                    <button onclick="openNewTaskModal()" class="bg-ugc-pink hover:bg-pink-600 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg shadow-ugc-pink/20 active:scale-95">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Novo Task
+                    </button>
+                </div>
+            </header>
+
+            <!-- Card de Prioridade (Destaque) -->
+            <div id="priority-card" class="animate-fade-in bg-gradient-to-r from-ugc-card to-[#25202b] rounded-2xl p-6 border border-ugc-border mb-10 relative overflow-hidden group min-h-[160px] flex items-center justify-center shadow-lg">
+                <div class="text-ugc-muted animate-pulse">Calculando prioridades...</div>
+            </div>
+
+            <!-- Grid de Estatísticas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 animate-fade-in" style="animation-delay: 0.1s;">
+                <!-- Pendentes -->
+                <div class="bg-ugc-card p-5 rounded-xl border border-ugc-border hover:border-ugc-pink/30 transition-all group shadow-sm">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 bg-purple-500/10 rounded-lg text-purple-400 group-hover:text-purple-300 group-hover:bg-purple-500/20 transition-colors">
+                            <i data-lucide="video" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <p id="stat-pending" class="text-2xl font-bold text-white">0</p>
+                    <p class="text-xs text-ugc-muted mt-1">UGCs Pendentes</p>
+                </div>
+
+                <!-- Entregues -->
+                <div class="bg-ugc-card p-5 rounded-xl border border-ugc-border hover:border-green-500/30 transition-all group shadow-sm">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 bg-green-500/10 rounded-lg text-green-400 group-hover:text-green-300 group-hover:bg-green-500/20 transition-colors">
+                            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <p id="stat-delivered" class="text-2xl font-bold text-white">0</p>
+                    <p class="text-xs text-ugc-muted mt-1">UGCs Entregues</p>
+                </div>
+
+                <!-- Receita Financeira -->
+                <div class="bg-ugc-card p-5 rounded-xl border border-ugc-border hover:border-yellow-500/30 transition-all group shadow-sm cursor-pointer" onclick="window.location.href='finance.html'">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 bg-yellow-500/10 rounded-lg text-yellow-400 group-hover:text-yellow-300 group-hover:bg-yellow-500/20 transition-colors">
+                            <i data-lucide="trending-up" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <p id="finance-balance" class="text-2xl font-bold text-white">R$ 0,00</p>
+                    <p id="finance-status" class="text-xs text-yellow-400 mt-1">Carregando...</p>
+                </div>
+
+                <!-- Prazos -->
+                <div class="bg-ugc-card p-5 rounded-xl border border-ugc-border hover:border-blue-500/30 transition-all group shadow-sm">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400 group-hover:text-blue-300 group-hover:bg-blue-500/20 transition-colors">
+                            <i data-lucide="clock" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <p id="stat-next-deadline" class="text-2xl font-bold text-white">-</p>
+                    <p class="text-xs text-ugc-muted mt-1">Próximo Prazo</p>
+                </div>
+            </div>
+
+            <!-- Lista de Tasks Recentes -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in" style="animation-delay: 0.2s;">
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-bold text-lg text-white">Últimas Atualizações</h3>
+                        <a href="tasks.html" class="text-xs text-ugc-pink hover:underline transition-colors">Ver quadro completo</a>
+                    </div>
+
+                    <div id="recent-tasks-list" class="space-y-3">
+                        <div class="text-center py-8 text-ugc-muted text-sm">Sincronizando tasks...</div>
+                    </div>
+                </div>
+
+                <!-- Banner Promocional / Dicas -->
+                <div class="space-y-4">
+                    <h3 class="font-bold text-lg text-white">Dicas Rápidas</h3>
+                    <a href="scripts.html" class="block bg-gradient-to-br from-purple-900/40 to-ugc-card p-5 rounded-xl border border-purple-500/20 relative overflow-hidden group hover:border-purple-500/40 transition-all cursor-pointer shadow-md">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                        <div class="flex items-start gap-3 relative z-10">
+                            <div class="p-2 bg-white/10 rounded-lg text-white">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm mb-1">Roteiros com IA</h4>
+                                <p class="text-xs text-ugc-muted leading-relaxed">Travou na criatividade? Gere roteiros virais em segundos com nossa IA.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Novo Task -->
+    <div id="task-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-ugc-card w-full max-w-md mx-4 rounded-2xl border border-ugc-border shadow-2xl p-6 transform scale-95 transition-transform duration-300" id="task-modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white">Novo Task</h3>
+                <button onclick="closeModal()" class="text-ugc-muted hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <form id="new-task-form" onsubmit="submitNewTask(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-ugc-muted mb-1.5">Marca / Cliente</label>
+                    <input type="text" id="task-brand" required placeholder="Ex: Nike, Creamy..." class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-ugc-pink focus:ring-1 focus:ring-ugc-pink transition-all placeholder-gray-500">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-ugc-muted mb-1.5">Tipo</label>
+                        <select id="task-type" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-ugc-pink transition-all">
+                            <option value="Reels">Reels</option>
+                            <option value="TikTok">TikTok</option>
+                            <option value="Stories">Stories</option>
+                            <option value="UGC Foto">UGC Foto</option>
+                            <option value="Combo">Combo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-ugc-muted mb-1.5">Valor (R$)</label>
+                        <input type="number" id="task-value" step="0.01" required placeholder="0.00" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-ugc-pink transition-all placeholder-gray-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-ugc-muted mb-1.5">Prazo de Entrega</label>
+                    <input type="date" id="task-date" required class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-ugc-pink transition-all [color-scheme:dark]">
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal()" class="flex-1 bg-transparent border border-ugc-border text-white py-2.5 rounded-lg hover:bg-ugc-hover transition-colors">Cancelar</button>
+                    <button type="submit" id="btn-save-task" class="flex-1 bg-ugc-pink hover:bg-pink-600 text-white font-bold py-2.5 rounded-lg shadow-lg shadow-ugc-pink/20 transition-all">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, collection, onSnapshot, addDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+        // --- SUA CONFIGURAÇÃO ORIGINAL DO FIREBASE ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyAP4fQ3TZ09XWggKNKZJDMJQ8TnRdNYwzc",
+          authDomain: "ugcp-9ec19.firebaseapp.com",
+          projectId: "ugcp-9ec19",
+          storageBucket: "ugcp-9ec19.firebasestorage.app",
+          messagingSenderId: "921864203168",
+          appId: "1:921864203168:web:55fb378c2a904737d512c5",
+          measurementId: "G-51WXW579CN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'creatorflow-app';
+        let userId = null;
+        let allTransactions = []; // Armazenar transações para renderizar
+
+        // Inicializa Auth
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.isAnonymous) {
+                // Se não estiver logado, exibe a camada de bloqueio em vez de redirecionar
+                if (user && user.isAnonymous) signOut(auth).catch(()=>{});
+                
+                // Exibe Overlay de Login
+                document.getElementById('login-overlay').classList.remove('hidden');
+                
+                // Tenta redirect seguro (funciona no download, falha silenciosamente no preview)
+                try { 
+                    // window.location.href = 'login.html'; // Comentado para evitar erro no editor
+                } catch(e) {}
+                
+                return;
+            }
+            // Se logado, esconde overlay
+            document.getElementById('login-overlay').classList.add('hidden');
+            
+            userId = user.uid;
+            updateUserProfile(user);
+            setupRealtimeListener();
+        });
+
+        // Atualiza UI com dados do usuário
+        function updateUserProfile(user) {
+            const name = user.displayName || user.email.split('@')[0];
+            const firstName = name.split(' ')[0];
+            
+            document.getElementById('user-name').innerText = name;
+            document.getElementById('header-name').innerText = firstName + "!";
+            document.getElementById('user-email').innerText = user.email;
+            
+            if (user.photoURL) {
+                document.getElementById('user-avatar').src = user.photoURL;
+            } else {
+                document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=E65696&color=fff`;
+            }
+
+            // Persistência local simples
+            localStorage.setItem('cf_profile_name', name);
+            localStorage.setItem('cf_profile_email', user.email);
+            localStorage.setItem('cf_profile_avatar', document.getElementById('user-avatar').src);
+        }
+
+        window.logout = async () => {
+            await signOut(auth);
+            // Ao sair, exibe o overlay novamente
+            document.getElementById('login-overlay').classList.remove('hidden');
+        };
+
+        // Escuta dados em Tempo Real
+        function setupRealtimeListener() {
+            if (!userId) return;
+            
+            // Listener Tasks
+            const tasksCollection = collection(db, 'artifacts', appId, 'users', userId, 'tasks');
+            
+            onSnapshot(tasksCollection, (snapshot) => {
+                const tasks = [];
+                snapshot.forEach((doc) => {
+                    tasks.push({ id: doc.id, ...doc.data() });
+                });
+                
+                tasks.sort((a, b) => {
+                    const dateA = a.date ? new Date(a.date) : new Date(8640000000000000);
+                    const dateB = b.date ? new Date(b.date) : new Date(8640000000000000);
+                    return dateA - dateB;
+                });
+
+                updateDashboard(tasks);
+                renderRecentTasks(tasks); // Renderizar com dados atuais de tasks
+            });
+
+            // Listener Financeiro
+            loadFinanceData();
+        }
+
+        async function loadFinanceData() {
+            try {
+                const { query, orderBy } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js').then(m => ({ query: m.query, orderBy: m.orderBy }));
+                const q = query(collection(db, 'artifacts', appId, 'users', userId, 'transactions'), orderBy('date', 'desc'));
+                
+                onSnapshot(q, (snapshot) => {
+                    let income = 0, expense = 0;
+                    allTransactions = [];
+                    
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        allTransactions.push({ id: doc.id, ...data });
+                        
+                        const val = parseFloat(data.amount);
+                        if (data.type === 'income') income += val;
+                        else if (data.type === 'expense') expense += val;
+                    });
+                    
+                    const balance = income - expense;
+                    document.getElementById('finance-balance').innerText = `R$ ${balance.toFixed(2).replace('.', ',')}`;
+                    
+                    const statusEl = document.getElementById('finance-status');
+                    if (balance >= 1000) {
+                        statusEl.innerText = '✓ Excelente';
+                        statusEl.className = 'text-xs text-green-400 mt-1';
+                    } else if (balance >= 500) {
+                        statusEl.innerText = '◐ Bom';
+                        statusEl.className = 'text-xs text-blue-400 mt-1';
+                    } else if (balance > 0) {
+                        statusEl.innerText = '! Atenção';
+                        statusEl.className = 'text-xs text-yellow-400 mt-1';
+                    } else {
+                        statusEl.innerText = '✗ Crítico';
+                        statusEl.className = 'text-xs text-red-400 mt-1';
+                    }
+                });
+            } catch(e) { console.error('Finance data error', e); }
+        }
+
+        function updateDashboard(tasks) {
+            const pending = tasks.filter(t => t.status !== 'done');
+            const done = tasks.filter(t => t.status === 'done');
+            
+            // Cálculos
+            const revenue = tasks.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0);
+            
+            // Prioridade (a task pendente mais próxima)
+            const priority = pending[0];
+
+            // Atualiza Estatísticas
+            animateValue('stat-pending', pending.length);
+            animateValue('stat-delivered', done.length);
+            
+            // Próximo Prazo
+            const nextDeadline = priority ? new Date(priority.date).toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'}) : '-';
+            document.getElementById('stat-next-deadline').innerText = nextDeadline;
+
+            // Subtitulo dinâmico
+            const subtitle = document.getElementById('header-subtitle');
+            subtitle.innerText = pending.length > 0 
+                ? `Você tem ${pending.length} entregas pendentes. Foco total! 🚀` 
+                : "Tudo limpo! Aproveite para descansar ou prospectar. 🥂";
+
+            // Renderiza Card de Prioridade
+            renderPriorityCard(priority);
+        }
+
+        function renderPriorityCard(task) {
+            const container = document.getElementById('priority-card');
+            
+            if (!task) {
+                container.innerHTML = `
+                    <div class="text-center z-10">
+                        <h2 class="text-xl font-bold text-white mb-1">Sem pendências! 🎉</h2>
+                        <p class="text-ugc-muted text-sm">Sua agenda está livre.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const today = new Date();
+            // Zerar horas para comparar apenas datas
+            today.setHours(0,0,0,0);
+            const taskDate = new Date(task.date);
+            taskDate.setHours(0,0,0,0);
+
+            const diffTime = taskDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+            let statusColor = diffDays < 3 ? 'text-red-400' : 'text-ugc-pink';
+            let statusText = '';
+            
+            if (diffDays < 0) statusText = 'Atrasado';
+            else if (diffDays === 0) statusText = 'É hoje!';
+            else if (diffDays === 1) statusText = 'Amanhã';
+            else statusText = `${diffDays} dias restantes`;
+
+            container.innerHTML = `
+                <div class="absolute top-0 right-0 w-64 h-64 bg-ugc-pink/10 rounded-full blur-3xl -mr-10 -mt-10 transition-all group-hover:bg-ugc-pink/20"></div>
+                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 w-full">
+                    <div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-2 h-2 rounded-full bg-ugc-pink animate-pulse"></span>
+                            <span class="text-ugc-pink text-xs font-bold uppercase tracking-wider">Prioridade Alta</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-white mb-1">${task.brand}</h2>
+                        <p class="text-ugc-muted text-sm flex items-center gap-2">
+                            <i data-lucide="video" class="w-3 h-3"></i> ${task.type} • R$ ${Number(task.value).toFixed(2)}
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-6 bg-ugc-bg/50 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
+                        <div class="text-center px-2">
+                            <p class="text-xs text-ugc-muted mb-1">Prazo</p>
+                            <p class="font-bold text-white text-lg">${taskDate.toLocaleDateString('pt-BR', {day:'2-digit', month:'short'})}</p>
+                            <p class="text-[10px] ${statusColor} font-bold mt-1">${statusText}</p>
+                        </div>
+                        <div class="h-8 w-px bg-white/10"></div>
+                        <a href="tasks.html" class="bg-ugc-pink hover:bg-pink-600 text-white px-4 py-2 rounded-lg font-medium text-xs transition-colors shadow-lg">
+                            Ver Detalhes
+                        </a>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function renderRecentTasks(tasks) {
+            const list = document.getElementById('recent-tasks-list');
+            
+            // Combinar tasks com TODAS as transações (receita, despesa e permuta)
+            const allFinanceTransactions = (allTransactions || [])
+                .map(t => ({
+                    ...t,
+                    isTransaction: true,
+                    isFinance: true
+                }));
+            
+            // Combinar e ordenar por data (mais recentes primeiro)
+            const combined = [
+                ...tasks.map(t => ({ ...t, isTransaction: false })),
+                ...allFinanceTransactions
+            ].sort((a, b) => {
+                const dateA = a.date ? new Date(a.date) : new Date(0);
+                const dateB = b.date ? new Date(b.date) : new Date(0);
+                return dateB - dateA;
+            });
+            
+            const recent = combined.slice(0, 3);
+            
+            // Contar permutas
+            const barterCount = (allTransactions || []).filter(t => t.type === 'barter').length;
+
+            if (recent.length === 0) {
+                list.innerHTML = `<p class="text-ugc-muted text-sm italic py-4">Nenhuma atividade encontrada.</p>`;
+                return;
+            }
+
+            list.innerHTML = recent.map(item => {
+                if (item.isFinance) {
+                    let icon, color, bg, label;
+                    
+                    if (item.type === 'income') {
+                        icon = 'arrow-up-right';
+                        color = 'text-green-400';
+                        bg = 'bg-green-500/10 border-green-500/30';
+                        label = '+';
+                    } else if (item.type === 'expense') {
+                        icon = 'arrow-down-right';
+                        color = 'text-red-400';
+                        bg = 'bg-red-500/10 border-red-500/30';
+                        label = '-';
+                    } else {
+                        icon = 'repeat-2';
+                        color = 'text-purple-400';
+                        bg = 'bg-purple-500/10 border-purple-500/30';
+                        label = '🔄';
+                    }
+                    
+                    return `
+                    <div class="bg-ugc-card p-4 rounded-xl border border-ugc-border flex items-center justify-between group hover:border-${color.split('-')[1]}-500/30 transition-all cursor-pointer">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full ${bg} border flex items-center justify-center text-xs font-bold ${color}">
+                                <i data-lucide="${icon}" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white group-hover:${color} transition-colors">${item.description || 'Transação'}</h4>
+                                <p class="text-xs text-ugc-muted">${item.category || 'Financeiro'} • ${new Date(item.date || item.createdAt).toLocaleDateString('pt-BR')}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            ${item.type === 'barter' 
+                                ? `<span class="text-xs font-medium px-2 py-1 rounded border bg-purple-500/10 text-purple-400 border-purple-500/20">Permuta</span>`
+                                : `<span class="font-bold ${color}">R$ ${parseFloat(item.amount || 0).toFixed(2)}</span>`
+                            }
+                        </div>
+                    </div>
+                    `;
+                } else {
+                    const isDone = item.status === 'done';
+                    return `
+                    <div class="bg-ugc-card p-4 rounded-xl border border-ugc-border flex items-center justify-between group hover:border-ugc-pink/30 transition-all cursor-pointer">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-ugc-bg border border-ugc-border flex items-center justify-center text-xs font-bold text-white uppercase">
+                                ${(item.brand || 'XX').substring(0,2)}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white group-hover:text-ugc-pink transition-colors">${item.brand || 'Task'}</h4>
+                                <p class="text-xs text-ugc-muted">${item.type || ''}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-medium px-2 py-1 rounded border ${isDone ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-gray-500/10 text-gray-400 border-gray-500/20'}">
+                                ${isDone ? 'Entregue' : 'Pendente'}
+                            </span>
+                        </div>
+                    </div>
+                    `;
+                }
+            }).join('');
+            
+            // Adicionar resumo
+            const incomeCount = (allTransactions || []).filter(t => t.type === 'income').length;
+            const expenseCount = (allTransactions || []).filter(t => t.type === 'expense').length;
+            
+            if (incomeCount > 0 || expenseCount > 0 || barterCount > 0) {
+                list.innerHTML += `
+                <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+                    ${incomeCount > 0 ? `<div class="bg-green-500/5 border border-green-500/20 rounded-lg p-2"><p class="text-xs text-green-400 font-bold">${incomeCount}</p><p class="text-[10px] text-ugc-muted">Receitas</p></div>` : ''}
+                    ${expenseCount > 0 ? `<div class="bg-red-500/5 border border-red-500/20 rounded-lg p-2"><p class="text-xs text-red-400 font-bold">${expenseCount}</p><p class="text-[10px] text-ugc-muted">Despesas</p></div>` : ''}
+                    ${barterCount > 0 ? `<div class="bg-purple-500/5 border border-purple-500/20 rounded-lg p-2"><p class="text-xs text-purple-400 font-bold">${barterCount}</p><p class="text-[10px] text-ugc-muted">Permutas</p></div>` : ''}
+                </div>
+                `;
+            }
+            
+            lucide.createIcons();
+        }
+
+        function animateValue(id, value) {
+            const el = document.getElementById(id);
+            if(el.innerText !== String(value)) {
+                el.style.opacity = 0;
+                setTimeout(() => {
+                    el.innerText = value;
+                    el.style.opacity = 1;
+                }, 200);
+            }
+        }
+
+        // --- FUNÇÕES DE INTERFACE (Globais) ---
+        window.submitNewTask = async (e) => {
+            e.preventDefault();
+            if (!userId) return;
+
+            const btn = document.getElementById('btn-save-task');
+            const originalText = btn.innerText;
+            btn.innerText = 'Salvando...';
+            btn.disabled = true;
+
+            const newTask = {
+                brand: document.getElementById('task-brand').value,
+                type: document.getElementById('task-type').value,
+                value: document.getElementById('task-value').value,
+                date: document.getElementById('task-date').value,
+                status: 'todo',
+                createdAt: new Date()
+            };
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'tasks'), newTask);
+                closeModal();
+                // O listener em tempo real vai atualizar a tela automaticamente
+            } catch (error) {
+                console.error("Erro ao salvar:", error);
+                alert("Erro ao salvar. Tente novamente.");
+            }
+
+            btn.innerText = originalText;
+            btn.disabled = false;
+        };
+
+        window.toggleMobileMenu = () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('hidden');
+        };
+
+        window.openNewTaskModal = () => {
+            const modal = document.getElementById('task-modal');
+            const content = document.getElementById('task-modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+            document.getElementById('task-date').value = new Date().toLocaleDateString('en-CA');
+        };
+
+        window.closeModal = () => {
+            const modal = document.getElementById('task-modal');
+            const content = document.getElementById('task-modal-content');
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('new-task-form').reset();
+            }, 300);
+        };
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
