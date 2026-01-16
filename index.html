@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creatorflow - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <style>
+        body { background-color: #f6f8fb; }
+        .card { max-width: 520px; width: 100%; }
+    </style>
+</head>
+<body class="flex h-screen items-center justify-center relative overflow-hidden">
+    
+    <!-- Background Decor -->
+    <div class="absolute inset-0 flex items-center justify-center p-6 bg-gradient-to-br from-white via-slate-50 to-white">
+        <div class="card bg-white rounded-2xl shadow-2xl p-8">
+            <div class="flex justify-center mb-6">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#3b82f6] to-[#06b6d4] flex items-center justify-center shadow-md">
+                    <i data-lucide="sparkles" class="text-white w-6 h-6"></i>
+                </div>
+            </div>
+
+            <h1 class="text-3xl font-bold text-slate-900 text-center mb-1">Bem-vindo(a)</h1>
+            <p class="text-slate-500 text-center mb-6">Faça login para gerenciar seus Tasks</p>
+
+            <div class="bg-slate-50 rounded-xl p-4 mb-6">
+                <div class="flex items-center bg-white rounded-lg shadow-sm overflow-hidden">
+                    <button id="btn-login" class="flex-1 text-slate-900 py-3 font-semibold">Entrar</button>
+                    <button id="btn-register" class="flex-1 text-slate-500 py-3">Cadastrar</button>
+                </div>
+            </div>
+
+            <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
+                <div id="name-row" class="grid grid-cols-2 gap-3 hidden">
+                    <div>
+                        <label class="block text-sm text-slate-600">Nome</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-slate-400"><i data-lucide="user" class="w-5 h-5"></i></span>
+                            <input type="text" id="firstName" placeholder="Seu nome" class="w-full pl-12 pr-4 py-3 rounded-lg bg-slate-100 border border-slate-200 focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-600">Sobrenome</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-slate-400"><i data-lucide="user" class="w-5 h-5"></i></span>
+                            <input type="text" id="lastName" placeholder="Seu sobrenome" class="w-full pl-12 pr-4 py-3 rounded-lg bg-slate-100 border border-slate-200 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <label class="block text-sm text-slate-600">Email</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-3 text-slate-400"><i data-lucide="mail" class="w-5 h-5"></i></span>
+                    <input type="email" id="email" required placeholder="seu@email.com" class="w-full pl-12 pr-4 py-3 rounded-lg bg-slate-100 border border-slate-200 focus:outline-none">
+                </div>
+
+                <label class="block text-sm text-slate-600">Senha</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-3 text-slate-400"><i data-lucide="lock" class="w-5 h-5"></i></span>
+                    <input type="password" id="password" required placeholder="••••••••" class="w-full pl-12 pr-4 py-3 rounded-lg bg-slate-100 border border-slate-200 focus:outline-none">
+                </div>
+
+                <div id="error-message" class="hidden text-red-500 text-sm"></div>
+
+                <button type="submit" id="submit-btn" class="w-full py-3 rounded-lg text-white font-semibold" style="background: linear-gradient(90deg,#2b6fb8 0%,#06b6d4 100%);">
+                    Entrar &nbsp; <i data-lucide="arrow-right" class="inline w-4 h-4"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAP4fQ3TZ09XWggKNKZJDMJQ8TnRdNYwzc",
+          authDomain: "ugcp-9ec19.firebaseapp.com",
+          projectId: "ugcp-9ec19",
+          storageBucket: "ugcp-9ec19.firebasestorage.app",
+          messagingSenderId: "921864203168",
+          appId: "1:921864203168:web:55fb378c2a904737d512c5",
+          measurementId: "G-51WXW579CN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        let isLoginMode = true;
+
+        onAuthStateChanged(auth, async (user) => {
+            // Se houver um usuário anônimo persistente, força sign-out para obrigar registro
+            if (user && user.isAnonymous) {
+                try { await signOut(auth); } catch(e){ console.warn('Erro ao deslogar anônimo', e); }
+                return;
+            }
+            // Redireciona apenas se o usuário estiver autenticado com email/senha
+            if (user && !user.isAnonymous) window.location.href = './tasks.html';
+        });
+
+        document.getElementById('btn-login').addEventListener('click', () => setMode(true));
+        document.getElementById('btn-register').addEventListener('click', () => setMode(false));
+
+        function setMode(login) {
+            isLoginMode = login;
+            const submit = document.getElementById('submit-btn');
+            const nameRow = document.getElementById('name-row');
+            submit.innerText = login ? 'Entrar' : 'Cadastrar';
+            if (login) {
+                nameRow.classList.add('hidden');
+            } else {
+                nameRow.classList.remove('hidden');
+            }
+        }
+
+        window.handleAuth = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const err = document.getElementById('error-message'); err.classList.add('hidden');
+            try {
+                if (isLoginMode) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    const firstName = document.getElementById('firstName').value;
+                    const lastName = document.getElementById('lastName').value;
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    // Atualiza displayName
+                    try { await updateProfile(userCredential.user, { displayName: `${firstName} ${lastName}` }); } catch(e){ console.warn('updateProfile failed', e); }
+                }
+            } catch (error) {
+                console.error(error);
+                err.classList.remove('hidden');
+                err.innerText = 'Erro: ' + (error.message || 'Tente novamente.');
+            }
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

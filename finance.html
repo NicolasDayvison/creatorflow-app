@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creatorflow - Financeiro</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        ugc: {
+                            bg: '#141414', sidebar: '#0F0F0F', card: '#1E1E1E', pink: '#E65696', purple: '#9D66E3',
+                            text: '#EAEAEA', muted: '#A0A0A0', border: '#2A2A2A', hover: '#252525',
+                            green: '#10B981', red: '#EF4444', yellow: '#F59E0B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #141414; color: #EAEAEA; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #141414; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(230, 86, 150, 0.15) 0%, rgba(157, 102, 227, 0.05) 100%);
+            border-left: 3px solid #E65696; color: #E65696;
+        }
+        
+        .type-radio:checked + div {
+            border-color: #E65696;
+            background-color: rgba(230, 86, 150, 0.1);
+            color: white;
+        }
+
+        .filter-btn.active {
+            background-color: #E65696;
+            color: white;
+            border-color: #E65696;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-sm">
+
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden backdrop-blur-sm transition-opacity duration-300" onclick="toggleMobileMenu()"></div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-ugc-sidebar border-r border-ugc-border flex flex-col md:static transition-transform duration-300 ease-in-out -translate-x-full md:translate-x-0">
+        <div class="h-20 flex items-center justify-between px-6 border-b border-ugc-border/50">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-ugc-pink to-ugc-purple flex items-center justify-center shrink-0 shadow-lg shadow-ugc-pink/20">
+                    <i data-lucide="sparkles" class="text-white w-4 h-4"></i>
+                </div>
+                <span class="font-display font-bold text-lg tracking-wide text-white">Creatorflow</span>
+            </div>
+            <button onclick="toggleMobileMenu()" class="md:hidden text-ugc-muted hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+
+        <nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+            <p class="px-3 text-[10px] font-bold text-ugc-muted uppercase tracking-wider mb-2 mt-2">Principal</p>
+            <a href="creatorflow.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i><span class="font-medium">Dashboard</span>
+            </a>
+            <a href="planner.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors">
+                <i data-lucide="calendar" class="w-5 h-5 mr-3"></i><span class="font-medium">Planner</span>
+            </a>
+            <a href="tasks.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors">
+                <i data-lucide="briefcase" class="w-5 h-5 mr-3"></i><span class="font-medium">Tasks</span>
+            </a>
+
+            <p class="px-3 text-[10px] font-bold text-ugc-muted uppercase tracking-wider mb-2 mt-6">Criação</p>
+            <a href="scripts.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors">
+                <i data-lucide="file-text" class="w-5 h-5 mr-3"></i><span class="font-medium">Roteiros IA</span>
+            </a>
+            <p class="px-3 text-[10px] font-bold text-ugc-muted uppercase tracking-wider mb-2 mt-6">Gestão</p>
+            <a href="contracts.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors">
+                <i data-lucide="file-signature" class="w-5 h-5 mr-3"></i><span class="font-medium">Contratos</span>
+            </a>
+            <a href="finance.html" class="nav-item active w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-text hover:bg-ugc-hover transition-colors">
+                <i data-lucide="dollar-sign" class="w-5 h-5 mr-3"></i><span class="font-medium">Financeiro</span>
+            </a>
+            <a href="pricing_simulator.html" class="nav-item w-full flex items-center px-3 py-2.5 rounded-lg text-ugc-muted hover:text-ugc-text hover:bg-ugc-hover transition-colors">
+                <i data-lucide="calculator" class="w-5 h-5 mr-3"></i><span class="font-medium">Simulador de Preço</span>
+            </a>
+        </nav>
+        
+        <div class="p-4 border-t border-ugc-border">
+            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-ugc-hover cursor-pointer transition-colors" title="Perfil">
+                <img id="profile-avatar" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Perfil" class="w-9 h-9 rounded-full border border-ugc-border shrink-0">
+                <div class="flex-1 min-w-0">
+                    <p id="profile-name" class="text-sm font-medium text-white truncate">Carregando...</p>
+                    <p id="profile-email" class="text-xs text-ugc-muted truncate">...</p>
+                </div>
+                <button onclick="logout()" class="ml-auto p-1.5 rounded hover:bg-ugc-hover text-ugc-muted hover:text-white transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0 bg-ugc-bg overflow-y-auto relative transition-all duration-300">
+        <header class="md:hidden h-16 bg-ugc-card border-b border-ugc-border flex items-center justify-between px-4 sticky top-0 z-20">
+            <div class="flex items-center gap-2">
+                <i data-lucide="dollar-sign" class="text-ugc-pink w-5 h-5"></i>
+                <span class="font-bold text-white">Financeiro</span>
+            </div>
+            <button onclick="toggleMobileMenu()" class="text-ugc-muted hover:text-white p-2"><i data-lucide="menu" class="w-6 h-6"></i></button>
+        </header>
+
+        <div class="p-6 md:p-10 max-w-7xl mx-auto w-full md:min-h-screen flex flex-col">
+            
+            <header class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-display font-bold text-white mb-2">Fluxo de Caixa</h1>
+                    <div class="flex items-center gap-2 bg-ugc-card rounded-lg p-1 border border-ugc-border w-fit">
+                        <button onclick="changeMonth(-1)" class="p-1.5 hover:bg-ugc-hover rounded-md text-ugc-muted hover:text-white transition-colors"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                        <span id="current-month-label" class="text-white font-medium min-w-[140px] text-center capitalize text-sm">Carregando...</span>
+                        <button onclick="changeMonth(1)" class="p-1.5 hover:bg-ugc-hover rounded-md text-ugc-muted hover:text-white transition-colors"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+                <button onclick="openTransactionModal()" class="bg-ugc-pink hover:bg-pink-600 text-white px-5 py-2.5 rounded-lg font-bold shadow-lg shadow-ugc-pink/20 flex items-center gap-2 transition-all hover:scale-105 active:scale-95">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Nova Transação
+                </button>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-ugc-card p-5 rounded-xl border border-ugc-border hover:border-green-500/30 transition-all">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="p-2 bg-green-500/10 rounded-lg text-green-400"><i data-lucide="check-circle-2" class="w-5 h-5"></i></div>
+                        <span class="text-[10px] text-ugc-muted uppercase tracking-wider font-bold">Recebido (Caixa)</span>
+                    </div>
+                    <p id="total-income-paid" class="text-2xl font-bold text-white mb-1">R$ 0,00</p>
+                    <p class="text-xs text-green-400 font-medium">Já na conta este mês</p>
+                </div>
+
+                <div class="bg-ugc-card p-5 rounded-xl border border-ugc-border hover:border-yellow-500/30 transition-all">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="p-2 bg-yellow-500/10 rounded-lg text-yellow-400"><i data-lucide="clock" class="w-5 h-5"></i></div>
+                        <span class="text-[10px] text-ugc-muted uppercase tracking-wider font-bold">A Receber</span>
+                    </div>
+                    <p id="total-income-pending" class="text-2xl font-bold text-white mb-1">R$ 0,00</p>
+                    <p class="text-xs text-yellow-400 font-medium">Previsto este mês</p>
+                </div>
+
+                <div class="bg-ugc-card p-5 rounded-xl border border-ugc-border hover:border-red-500/30 transition-all">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="p-2 bg-red-500/10 rounded-lg text-red-400"><i data-lucide="arrow-down-right" class="w-5 h-5"></i></div>
+                        <span class="text-[10px] text-ugc-muted uppercase tracking-wider font-bold">Despesas</span>
+                    </div>
+                    <p id="total-expense" class="text-2xl font-bold text-white mb-1">R$ 0,00</p>
+                    <p class="text-xs text-red-400 font-medium">Total de saídas</p>
+                </div>
+
+                <div class="bg-ugc-card p-5 rounded-xl border border-ugc-border hover:border-purple-500/30 transition-all">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="p-2 bg-purple-500/10 rounded-lg text-purple-400"><i data-lucide="repeat-2" class="w-5 h-5"></i></div>
+                        <span class="text-[10px] text-ugc-muted uppercase tracking-wider font-bold">Permutas</span>
+                    </div>
+                    <p id="total-barter" class="text-2xl font-bold text-white mb-1">0</p>
+                    <p class="text-xs text-purple-400 font-medium">Itens trocados</p>
+                </div>
+            </div>
+
+            <div class="bg-ugc-card border border-ugc-border rounded-xl flex flex-col overflow-hidden min-h-[400px]">
+                <div class="p-4 border-b border-ugc-border flex flex-col md:flex-row justify-between items-center gap-4">
+                    <h3 class="font-bold text-white flex items-center gap-2">
+                        Extrato do Mês
+                        <span id="list-count" class="text-xs bg-ugc-border px-2 py-0.5 rounded-full text-ugc-muted">0</span>
+                    </h3>
+                    
+                    <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+                        <button onclick="setFilter('all')" class="filter-btn active px-3 py-1.5 rounded-lg border border-ugc-border text-xs font-medium text-ugc-muted hover:text-white transition-colors">Todos</button>
+                        <button onclick="setFilter('pending')" class="filter-btn px-3 py-1.5 rounded-lg border border-ugc-border text-xs font-medium text-ugc-muted hover:text-white transition-colors">A Receber</button>
+                        <button onclick="setFilter('income')" class="filter-btn px-3 py-1.5 rounded-lg border border-ugc-border text-xs font-medium text-ugc-muted hover:text-white transition-colors">Recebidos</button>
+                        <button onclick="setFilter('expense')" class="filter-btn px-3 py-1.5 rounded-lg border border-ugc-border text-xs font-medium text-ugc-muted hover:text-white transition-colors">Saídas</button>
+                        <button onclick="setFilter('barter')" class="filter-btn px-3 py-1.5 rounded-lg border border-ugc-border text-xs font-medium text-ugc-muted hover:text-white transition-colors flex items-center gap-1"><i data-lucide="repeat-2" class="w-3 h-3"></i> Permutas</button>
+                    </div>
+                </div>
+                
+                <div class="overflow-y-auto flex-1 p-2" id="transactions-list">
+                    </div>
+                
+                <div class="p-4 bg-ugc-bg/30 border-t border-ugc-border flex justify-between items-center">
+                    <span class="text-sm text-ugc-muted">Saldo Líquido (Recebido - Despesas):</span>
+                    <span id="net-balance" class="text-xl font-bold text-white">R$ 0,00</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="transaction-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div id="transaction-modal-content" class="bg-ugc-card w-full max-w-md mx-4 rounded-2xl border border-ugc-border shadow-2xl transform scale-95 transition-transform duration-300 p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="modal-title" class="text-xl font-bold text-white">Nova Transação</h3>
+                <button onclick="closeModal()" class="text-ugc-muted hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <form id="transaction-form" onsubmit="saveTransaction(event)" class="space-y-4">
+                <input type="hidden" id="transaction-id" value="">
+                
+                <div class="grid grid-cols-3 gap-2 mb-2">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="type" value="income" class="type-radio hidden" checked onchange="toggleStatusField()">
+                        <div class="border border-ugc-border rounded-lg py-3 text-center text-ugc-muted hover:bg-ugc-hover transition-all font-medium text-xs">
+                            Entrada
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="type" value="expense" class="type-radio hidden" onchange="toggleStatusField()">
+                        <div class="border border-ugc-border rounded-lg py-3 text-center text-ugc-muted hover:bg-ugc-hover transition-all font-medium text-xs">
+                            Saída
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="type" value="barter" class="type-radio hidden" onchange="toggleStatusField()">
+                        <div class="border border-ugc-border rounded-lg py-3 text-center text-ugc-muted hover:bg-ugc-hover transition-all font-medium text-xs">
+                            Permuta
+                        </div>
+                    </label>
+                </div>
+
+                <div id="status-field" class="bg-ugc-bg p-3 rounded-lg border border-ugc-border">
+                    <label class="block text-xs font-medium text-ugc-muted mb-2">Status do Pagamento</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="status" value="pending" checked class="accent-ugc-pink">
+                            <span class="text-sm text-white">A Receber (Pendente)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="status" value="paid" class="accent-ugc-pink">
+                            <span class="text-sm text-white">Recebido (Pago)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-ugc-muted mb-1.5">Descrição</label>
+                    <input type="text" id="desc" required placeholder="Ex: Job Natura, Adobe, Ring Light..." class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ugc-pink transition-all">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-ugc-muted mb-1.5">Valor (R$)</label>
+                        <input type="number" id="amount" step="0.01" required placeholder="0,00" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ugc-pink transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-ugc-muted mb-1.5">Data</label>
+                        <input type="date" id="date" required class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ugc-pink transition-all [color-scheme:dark]">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-ugc-muted mb-1.5">Categoria</label>
+                    <select id="category" onchange="toggleCustomCategory()" class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ugc-pink transition-all">
+                        <option value="UGC">Job UGC</option>
+                        <option value="Ferramentas">Ferramentas / Software</option>
+                        <option value="Equipamento">Equipamento</option>
+                        <option value="Impostos">Impostos</option>
+                        <option value="Pessoal">Retirada Pessoal</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+
+                <div id="custom-category-div" class="hidden">
+                    <label class="block text-xs font-medium text-ugc-muted mb-1.5">Qual categoria?</label>
+                    <input type="text" id="custom-category" placeholder="Digite..." class="w-full bg-ugc-bg border border-ugc-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ugc-pink transition-all">
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal()" class="flex-1 bg-transparent border border-ugc-border text-white py-3 rounded-lg hover:bg-ugc-hover transition-colors font-medium">Cancelar</button>
+                    <button type="submit" id="submit-btn" class="flex-1 bg-ugc-pink hover:bg-pink-600 text-white font-bold py-3 rounded-lg shadow-lg shadow-ugc-pink/20 transition-all transform active:scale-95">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, updateDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAP4fQ3TZ09XWggKNKZJDMJQ8TnRdNYwzc",
+          authDomain: "ugcp-9ec19.firebaseapp.com",
+          projectId: "ugcp-9ec19",
+          storageBucket: "ugcp-9ec19.firebasestorage.app",
+          messagingSenderId: "921864203168",
+          appId: "1:921864203168:web:55fb378c2a904737d512c5",
+          measurementId: "G-51WXW579CN"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'creatorflow-app';
+        let userId = null;
+        
+        // Estado Global
+        let allTransactions = [];
+        let currentDate = new Date();
+        let currentFilter = 'all';
+
+        // Auth
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.isAnonymous) {
+                window.location.href = './index.html';
+                return;
+            }
+            userId = user.uid;
+            
+            const name = user.displayName || user.email.split('@')[0];
+            document.getElementById('profile-name').innerText = name;
+            document.getElementById('profile-email').innerText = user.email;
+            if(user.photoURL) document.getElementById('profile-avatar').src = user.photoURL;
+
+            // Inicia Listener
+            setupTransactionsListener();
+            updateMonthLabel();
+        });
+
+        // --- LÓGICA DE TEMPO ---
+        window.changeMonth = (delta) => {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            updateMonthLabel();
+            renderTransactions(); // Re-renderiza com filtro de data
+        }
+
+        function updateMonthLabel() {
+            const label = currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+            document.getElementById('current-month-label').innerText = label;
+        }
+
+        function isSameMonth(dateString) {
+            const [y, m, d] = dateString.split('-');
+            const date = new Date(y, m - 1, d);
+            return date.getMonth() === currentDate.getMonth() && date.getFullYear() === currentDate.getFullYear();
+        }
+
+        // --- LÓGICA DE DADOS ---
+        function setupTransactionsListener() {
+            // Pegamos TUDO e filtramos no front para facilitar troca de meses sem novas requisições pesadas
+            const q = query(collection(db, 'artifacts', appId, 'users', userId, 'transactions'), orderBy('date', 'desc'));
+            
+            onSnapshot(q, (snapshot) => {
+                allTransactions = [];
+                snapshot.forEach(doc => {
+                    allTransactions.push({ id: doc.id, ...doc.data() });
+                });
+                renderTransactions();
+            });
+        }
+
+        function renderTransactions() {
+            const list = document.getElementById('transactions-list');
+            list.innerHTML = '';
+
+            let incomePaid = 0;
+            let incomePending = 0;
+            let expense = 0;
+            let barterCount = 0;
+            let visibleCount = 0;
+
+            // 1. Calcular Totais do Mês (independente do filtro de visualização)
+            const monthlyTransactions = allTransactions.filter(t => isSameMonth(t.date));
+
+            monthlyTransactions.forEach(t => {
+                const val = parseFloat(t.amount || 0);
+                if (t.type === 'income') {
+                    if (t.status === 'paid') incomePaid += val;
+                    else incomePending += val; // Pendente
+                } else if (t.type === 'expense') {
+                    expense += val;
+                } else if (t.type === 'barter') {
+                    barterCount++;
+                }
+            });
+
+            // Atualizar Cards
+            document.getElementById('total-income-paid').innerText = `R$ ${incomePaid.toFixed(2)}`;
+            document.getElementById('total-income-pending').innerText = `R$ ${incomePending.toFixed(2)}`;
+            document.getElementById('total-expense').innerText = `R$ ${expense.toFixed(2)}`;
+            document.getElementById('total-barter').innerText = barterCount;
+            
+            const net = incomePaid - expense;
+            const netEl = document.getElementById('net-balance');
+            netEl.innerText = `R$ ${net.toFixed(2)}`;
+            netEl.className = `text-xl font-bold ${net >= 0 ? 'text-green-400' : 'text-red-400'}`;
+
+            // 2. Filtrar Lista para Visualização
+            let filteredList = monthlyTransactions;
+            if (currentFilter === 'pending') {
+                filteredList = monthlyTransactions.filter(t => t.type === 'income' && t.status === 'pending');
+            } else if (currentFilter === 'income') {
+                filteredList = monthlyTransactions.filter(t => t.type === 'income' && t.status === 'paid');
+            } else if (currentFilter === 'expense') {
+                filteredList = monthlyTransactions.filter(t => t.type === 'expense');
+            } else if (currentFilter === 'barter') {
+                filteredList = monthlyTransactions.filter(t => t.type === 'barter');
+            }
+
+            document.getElementById('list-count').innerText = filteredList.length;
+
+            if (filteredList.length === 0) {
+                list.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-20 text-ugc-muted opacity-50">
+                        <i data-lucide="filter" class="w-10 h-10 mb-2"></i>
+                        <p>Nenhum lançamento neste filtro.</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            // Renderizar Lista
+            filteredList.forEach(data => {
+                const val = parseFloat(data.amount || 0);
+                let icon, color, bg, sign, statusBadge = '';
+
+                if (data.type === 'income') {
+                    if (data.status === 'pending') {
+                        icon = 'clock'; color = 'text-yellow-400'; bg = 'bg-yellow-500/10'; sign = '';
+                        statusBadge = '<span class="text-[10px] bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 px-1.5 py-0.5 rounded ml-2">Pendente</span>';
+                    } else {
+                        icon = 'check-circle-2'; color = 'text-green-400'; bg = 'bg-green-500/10'; sign = '+';
+                        statusBadge = '<span class="text-[10px] bg-green-500/10 text-green-400 border border-green-500/20 px-1.5 py-0.5 rounded ml-2">Pago</span>';
+                    }
+                } else if (data.type === 'expense') {
+                    icon = 'arrow-down-right'; color = 'text-red-400'; bg = 'bg-red-500/10'; sign = '-';
+                } else {
+                    icon = 'repeat-2'; color = 'text-purple-400'; bg = 'bg-purple-500/10'; sign = '';
+                }
+
+                // Data formatada DD/MM
+                const [yy, mm, dd] = data.date.split('-');
+                const dateFmt = `${dd}/${mm}`;
+
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-4 hover:bg-ugc-hover border-b border-ugc-border/50 last:border-0 transition-colors group rounded-lg';
+                item.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="p-2 rounded-lg ${bg} ${color} shrink-0">
+                            <i data-lucide="${icon}" class="w-5 h-5"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center">
+                                <p class="font-bold text-white truncate">${data.description}</p>
+                                ${statusBadge}
+                            </div>
+                            <p class="text-xs text-ugc-muted truncate">${data.category} • ${dateFmt}</p>
+                        </div>
+                    </div>
+                    <div class="text-right flex items-center gap-4 shrink-0 pl-2">
+                        <span class="font-bold ${color} text-lg whitespace-nowrap">
+                            ${data.type === 'barter' ? 'Permuta' : sign + ' R$ ' + val.toFixed(2)}
+                        </span>
+                        <div class="flex gap-1">
+                            <button onclick="editTransaction('${data.id}')" class="text-ugc-muted hover:text-ugc-pink opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded hover:bg-ugc-card">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deleteTransaction('${data.id}')" class="text-ugc-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded hover:bg-ugc-card">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+            lucide.createIcons();
+        }
+
+        // --- AÇÕES UI ---
+        window.setFilter = (filter) => {
+            currentFilter = filter;
+            // Atualiza botões
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            // Lógica simples para achar o botão clicado (pelo texto ou onlick) - aqui resetamos styles
+            event.target.classList.add('active'); 
+            renderTransactions();
+        }
+
+        window.toggleStatusField = () => {
+            const type = document.querySelector('input[name="type"]:checked').value;
+            const statusDiv = document.getElementById('status-field');
+            if (type === 'income') {
+                statusDiv.classList.remove('hidden');
+            } else {
+                statusDiv.classList.add('hidden');
+            }
+        }
+
+        window.saveTransaction = async (e) => {
+            e.preventDefault();
+            if (!userId) return;
+
+            const transactionId = document.getElementById('transaction-id').value;
+            const type = document.querySelector('input[name="type"]:checked').value;
+            
+            // Status só importa se for renda, senão é 'paid' (despesa paga) ou null (permuta)
+            let status = 'paid';
+            if (type === 'income') {
+                status = document.querySelector('input[name="status"]:checked').value;
+            }
+
+            const desc = document.getElementById('desc').value;
+            const amount = document.getElementById('amount').value;
+            const date = document.getElementById('date').value;
+            let category = document.getElementById('category').value;
+            
+            if (category === 'Outros') {
+                category = document.getElementById('custom-category').value || 'Outros';
+            }
+
+            const dataPayload = {
+                type, description: desc, amount, date, category, status, updatedAt: new Date()
+            };
+
+            try {
+                if (transactionId) {
+                    await updateDoc(doc(db, 'artifacts', appId, 'users', userId, 'transactions', transactionId), dataPayload);
+                    showToast('Transação atualizada!');
+                } else {
+                    dataPayload.createdAt = new Date();
+                    await addDoc(collection(db, 'artifacts', appId, 'users', userId, 'transactions'), dataPayload);
+                    showToast('Salvo com sucesso!');
+                }
+                closeModal();
+            } catch (e) {
+                console.error(e); showToast('Erro ao salvar.');
+            }
+        }
+
+        window.editTransaction = (id) => {
+            const transaction = allTransactions.find(t => t.id === id);
+            if (!transaction) return;
+
+            document.getElementById('transaction-id').value = id;
+            document.getElementById('desc').value = transaction.description;
+            document.getElementById('amount').value = transaction.amount;
+            document.getElementById('date').value = transaction.date;
+            document.getElementById('category').value = transaction.category; // Se for custom, vai cair em Outros visualmente
+            
+            // Set Radio Type
+            document.querySelector(`input[name="type"][value="${transaction.type}"]`).checked = true;
+            toggleStatusField();
+
+            // Set Status
+            if (transaction.type === 'income' && transaction.status) {
+                document.querySelector(`input[name="status"][value="${transaction.status}"]`).checked = true;
+            }
+
+            document.getElementById('modal-title').innerText = 'Editar Transação';
+            document.getElementById('submit-btn').innerText = 'Atualizar';
+            openTransactionModal(true); // true = editing
+        }
+
+        window.deleteTransaction = async (id) => {
+            if(confirm('Tem certeza?')) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'transactions', id));
+                    showToast('Excluído.');
+                } catch(e) { console.error(e); }
+            }
+        }
+
+        // --- HELPERS ---
+        window.openTransactionModal = (isEditing = false) => {
+            const m = document.getElementById('transaction-modal');
+            const c = document.getElementById('transaction-modal-content');
+            m.classList.remove('hidden');
+            setTimeout(() => { m.classList.remove('opacity-0'); c.classList.remove('scale-95'); c.classList.add('scale-100'); }, 10);
+            
+            if (!isEditing) {
+                document.getElementById('transaction-id').value = '';
+                document.getElementById('transaction-form').reset();
+                // Data default hoje
+                document.getElementById('date').value = new Date().toLocaleDateString('en-CA');
+                document.getElementById('modal-title').innerText = 'Nova Transação';
+                document.getElementById('submit-btn').innerText = 'Salvar';
+                toggleStatusField();
+            }
+        }
+
+        window.closeModal = () => {
+            const m = document.getElementById('transaction-modal');
+            const c = document.getElementById('transaction-modal-content');
+            m.classList.add('opacity-0'); c.classList.remove('scale-100'); c.classList.add('scale-95');
+            setTimeout(() => { m.classList.add('hidden'); }, 300);
+        }
+
+        window.toggleCustomCategory = () => {
+            const cat = document.getElementById('category').value;
+            document.getElementById('custom-category-div').classList.toggle('hidden', cat !== 'Outros');
+        }
+
+        window.toggleMobileMenu = () => { 
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            // Toggle classe -translate-x-full para controle via CSS mobile
+            sidebar.classList.toggle('-translate-x-full');
+            if (!sidebar.classList.contains('-translate-x-full')) overlay.classList.remove('hidden');
+            else overlay.classList.add('hidden');
+        }
+
+        window.showToast = (m) => { const c=document.getElementById('toast-container'), t=document.createElement('div'); t.className='toast bg-ugc-card border border-ugc-pink/30 text-white px-4 py-3 rounded-lg shadow-xl flex gap-3 min-w-[300px] pointer-events-auto items-center'; t.innerHTML=`<div class="bg-ugc-pink/20 p-1.5 rounded-full text-ugc-pink"><i data-lucide="check" class="w-4 h-4"></i></div><span class="text-sm font-medium">${m}</span>`; c.appendChild(t); lucide.createIcons(); setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(20px)';setTimeout(()=>t.remove(),300)},3000); }
+        window.logout = async () => { try { await signOut(auth); window.location.href = './index.html'; } catch(e){} }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
